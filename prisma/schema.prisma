@@ -1,0 +1,245 @@
+// Openfolio - Investment Analysis Platform Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// (1) Raw Macro Time Series
+// ============================================================
+model MacroSeries {
+  id     BigInt        @id @default(autoincrement())
+  code   String        @unique
+  name   String?
+  source String?
+  freq   String?
+  points MacroPoint[]
+
+  @@map("macro_series")
+}
+
+model MacroPoint {
+  seriesId    BigInt      @map("series_id")
+  ts          DateTime    @db.Date
+  value       Decimal?    @db.Decimal
+  revisionOf  DateTime?   @map("revision_of") @db.Date
+  rawJson     Json?       @map("raw_json") @db.JsonB
+  url         String?
+
+  series      MacroSeries @relation(fields: [seriesId], references: [id])
+
+  @@id([seriesId, ts, revisionOf])
+  @@map("macro_points")
+}
+
+// ============================================================
+// (2) Normalized Features + Regime
+// ============================================================
+model MacroFeatureDaily {
+  date        DateTime @db.Date
+  feature     String
+  value       Decimal? @db.Decimal
+  detailsJson Json?    @map("details_json") @db.JsonB
+
+  @@id([date, feature])
+  @@map("macro_features_daily")
+}
+
+model MacroRegimeDaily {
+  date         DateTime @id @db.Date
+  growthZ      Decimal? @map("growth_z") @db.Decimal
+  inflationZ   Decimal? @map("inflation_z") @db.Decimal
+  liquidityZ   Decimal? @map("liquidity_z") @db.Decimal
+  ratesZ       Decimal? @map("rates_z") @db.Decimal
+  regime       String?
+  detailsJson  Json?    @map("details_json") @db.JsonB
+
+  @@map("macro_regime_daily")
+}
+
+// ============================================================
+// (3) EOD Prices (Sector ETFs / Individual Stocks)
+// ============================================================
+model PriceDaily {
+  ticker    String
+  date      DateTime @db.Date
+  open      Decimal? @db.Decimal
+  high      Decimal? @db.Decimal
+  low       Decimal? @db.Decimal
+  close     Decimal? @db.Decimal
+  adjClose  Decimal? @map("adj_close") @db.Decimal
+  volume    BigInt?
+  source    String?
+  rawJson   Json?    @map("raw_json") @db.JsonB
+
+  @@id([ticker, date])
+  @@index([ticker])
+  @@index([date])
+  @@map("prices_daily")
+}
+
+// ============================================================
+// (4) Sector Scores
+// ============================================================
+model SectorScore {
+  date           DateTime @db.Date
+  sector         String
+  score          Decimal? @db.Decimal
+  componentsJson Json?    @map("components_json") @db.JsonB
+
+  @@id([date, sector])
+  @@index([date])
+  @@map("sector_scores")
+}
+
+// ============================================================
+// (5) Event Documents + NLP
+// ============================================================
+model EventDoc {
+  id     BigInt    @id @default(autoincrement())
+  ticker String?
+  dt     DateTime? @db.Timestamptz
+  type   String?
+  url    String?
+  title  String?
+  body   String?
+  nlp    EventNlp?
+
+  @@index([ticker])
+  @@index([dt])
+  @@map("event_docs")
+}
+
+model EventNlp {
+  docId        BigInt   @id @map("doc_id")
+  sentiment    Float?   @db.Real
+  guidance     String?
+  surpriseEps  Float?   @map("surprise_eps") @db.Real
+  topics       String[]
+  quotes       Json?    @db.JsonB
+  model        String?
+  version      String?
+
+  doc          EventDoc @relation(fields: [docId], references: [id])
+
+  @@map("event_nlp")
+}
+
+// ============================================================
+// (6) Technical Analysis (Daily)
+// ============================================================
+model TaDaily {
+  ticker     String
+  date       DateTime @db.Date
+  rsi14      Decimal? @map("rsi14") @db.Decimal
+  macd       Decimal? @db.Decimal
+  macdSignal Decimal? @map("macd_signal") @db.Decimal
+  sma20      Decimal? @map("sma20") @db.Decimal
+  sma50      Decimal? @map("sma50") @db.Decimal
+  sma200     Decimal? @map("sma200") @db.Decimal
+  atr14      Decimal? @map("atr14") @db.Decimal
+  flags      Json?    @db.JsonB
+
+  @@id([ticker, date])
+  @@index([ticker])
+  @@index([date])
+  @@map("ta_daily")
+}
+
+// ============================================================
+// (7) Screening Steps + Rankings
+// ============================================================
+model ScreeningStep {
+  date         DateTime @db.Date
+  ticker       String
+  step         String
+  pass         Boolean?
+  score        Decimal? @db.Decimal
+  evidenceJson Json?    @map("evidence_json") @db.JsonB
+
+  @@id([date, ticker, step])
+  @@index([date])
+  @@index([ticker])
+  @@map("screening_steps")
+}
+
+model Ranking {
+  date           DateTime @db.Date
+  ticker         String
+  totalScore     Decimal? @map("total_score") @db.Decimal
+  componentsJson Json?    @map("components_json") @db.JsonB
+  decision       String?
+  version        String?
+
+  @@id([date, ticker])
+  @@index([date])
+  @@map("rankings")
+}
+
+// ============================================================
+// (8) Multi AI Agents + Weights/Performance + Decision Logs
+// ============================================================
+model AiAgent {
+  id              Int                 @id @default(autoincrement())
+  name            String              @unique
+  description     String?
+  promptTemplate  String?             @map("prompt_template")
+  riskProfile     String?             @map("risk_profile")
+  weightsJson     Json?               @map("weights_json") @db.JsonB
+
+  weightsHistory  AiWeightHistory[]
+  performance     AiPerformance[]
+
+  @@map("ai_agents")
+}
+
+model AiWeightHistory {
+  date       DateTime @db.Date
+  agentId    Int      @map("agent_id")
+  ticker     String   // includes 'CASH'
+  weight     Decimal? @db.Decimal
+  reasonJson Json?    @map("reason_json") @db.JsonB
+
+  agent      AiAgent  @relation(fields: [agentId], references: [id])
+
+  @@id([date, agentId, ticker])
+  @@index([date])
+  @@index([agentId])
+  @@map("ai_weights_history")
+}
+
+model AiPerformance {
+  date             DateTime @db.Date
+  agentId          Int      @map("agent_id")
+  nav              Decimal? @db.Decimal
+  cashWeight       Decimal? @map("cash_weight") @db.Decimal
+  pnlDaily         Decimal? @map("pnl_daily") @db.Decimal
+  sharpe           Decimal? @db.Decimal
+  mdd              Decimal? @db.Decimal
+  benchmarkReturn  Decimal? @map("benchmark_return") @db.Decimal
+
+  agent            AiAgent  @relation(fields: [agentId], references: [id])
+
+  @@id([date, agentId])
+  @@index([date])
+  @@index([agentId])
+  @@map("ai_performance")
+}
+
+model DecisionLog {
+  date         DateTime @db.Date
+  stage        String
+  agent        String
+  inputRef     Json?    @map("input_ref") @db.JsonB
+  computedRef  Json?    @map("computed_ref") @db.JsonB
+  decision     Json?    @db.JsonB
+  rationaleMd  String?  @map("rationale_md")
+
+  @@id([date, stage, agent])
+  @@index([date])
+  @@map("decision_logs")
+}

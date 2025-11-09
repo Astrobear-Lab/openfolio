@@ -1,0 +1,107 @@
+{
+  "macro_series": [
+    {
+      "code": "CPIAUCSL",
+      "name": "Consumer Price Index for All Urban Consumers: All Items",
+      "source": "FRED",
+      "freq": "M",
+      "category": "inflation"
+    },
+    {
+      "code": "CPILFESL",
+      "name": "Core CPI (ex Food & Energy)",
+      "source": "FRED",
+      "freq": "M",
+      "category": "inflation"
+    },
+    {
+      "code": "INDPRO",
+      "name": "Industrial Production Index",
+      "source": "FRED",
+      "freq": "M",
+      "category": "growth"
+    },
+    {
+      "code": "PAYEMS",
+      "name": "Nonfarm Payrolls",
+      "source": "FRED",
+      "freq": "M",
+      "category": "growth"
+    },
+    {
+      "code": "UNRATE",
+      "name": "Unemployment Rate",
+      "source": "FRED",
+      "freq": "M",
+      "category": "growth"
+    },
+    {
+      "code": "M2SL",
+      "name": "M2 Money Supply",
+      "source": "FRED",
+      "freq": "M",
+      "category": "liquidity"
+    },
+    {
+      "code": "WALCL",
+      "name": "Fed Balance Sheet",
+      "source": "FRED",
+      "freq": "W",
+      "category": "liquidity"
+    },
+    {
+      "code": "DGS10",
+      "name": "10-Year Treasury Yield",
+      "source": "FRED",
+      "freq": "D",
+      "category": "rates"
+    },
+    {
+      "code": "DGS2",
+      "name": "2-Year Treasury Yield",
+      "source": "FRED",
+      "freq": "D",
+      "category": "rates"
+    }
+  ],
+  "sector_etfs": [
+    {"ticker": "XLY", "name": "Consumer Discretionary"},
+    {"ticker": "XLP", "name": "Consumer Staples"},
+    {"ticker": "XLE", "name": "Energy"},
+    {"ticker": "XLF", "name": "Financials"},
+    {"ticker": "XLV", "name": "Healthcare"},
+    {"ticker": "XLI", "name": "Industrials"},
+    {"ticker": "XLB", "name": "Materials"},
+    {"ticker": "XLK", "name": "Technology"},
+    {"ticker": "XLU", "name": "Utilities"},
+    {"ticker": "XLRE", "name": "Real Estate"},
+    {"ticker": "XLC", "name": "Communication Services"}
+  ],
+  "sample_stocks": [
+    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA",
+    "TSLA", "META", "JPM", "JNJ", "V",
+    "PG", "UNH", "HD", "MA", "XOM",
+    "CVX", "KO", "PEP", "COST", "WMT"
+  ],
+  "regime_rules": {
+    "Goldilocks": {"growth": ">0", "inflation": "<0"},
+    "Reflation": {"growth": ">0", "inflation": ">0"},
+    "Stagflation": {"growth": "<0", "inflation": ">0"},
+    "Disinflation": {"growth": "<0", "inflation": "<0"}
+  },
+  "scoring_weights": {
+    "sector": {
+      "ret1m": 1.0,
+      "ret3m": 1.0,
+      "ret6m": 0.5,
+      "vol3m": -0.5,
+      "regime_tilt": 1.0
+    },
+    "stock": {
+      "quality": 0.25,
+      "value": 0.25,
+      "event": 0.30,
+      "technical": 0.20
+    }
+  }
+}

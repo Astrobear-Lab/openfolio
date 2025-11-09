@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark light;
+}
+
+@layer base {
+  * {
+    outline-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+  }
+
+  body {
+    @apply bg-background text-text font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-text-strong;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-lg;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-text-subtle;
+}
+
+/* Table styling */
+@layer components {
+  .data-table {
+    @apply w-full border-collapse;
+  }
+
+  .data-table th {
+    @apply bg-surface text-left px-4 py-3 text-sm font-semibold text-text-strong border-b border-border;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 text-sm border-b border-border;
+  }
+
+  .data-table tbody tr:hover {
+    @apply bg-surface/50;
+  }
+
+  .data-table .numeric {
+    @apply text-right font-mono;
+  }
+}
