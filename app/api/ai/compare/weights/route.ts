@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { apiSuccess, apiError, getLatestDate } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
@@ -9,54 +9,55 @@ export async function GET(request: NextRequest) {
   try {
     const targetDate = getLatestDate(dateParam);
 
-    const agents = await prisma.aiAgent.findMany({
-      orderBy: { id: "asc" },
-    });
+    // Get all agents
+    const { data: agents, error: agentsError } = await supabase
+      .from("ai_agents")
+      .select("*")
+      .order("id", { ascending: true });
 
-    const weights = await prisma.aiWeightHistory.findMany({
-      where: {
-        date: {
-          lte: targetDate,
-        },
-      },
-      orderBy: { date: "desc" },
-      take: 1000,
-    });
+    if (agentsError || !agents) {
+      return apiError("Failed to fetch agents", 500);
+    }
 
-    // Get latest date
-    const latestDate = weights[0]?.date;
-    if (!latestDate) {
+    // Get latest weights
+    const { data: weights, error: weightsError } = await supabase
+      .from("ai_weights_history")
+      .select("*")
+      .lte("date", targetDate.toISOString().split("T")[0])
+      .order("date", { ascending: false })
+      .limit(1000);
+
+    if (weightsError || !weights || weights.length === 0) {
       return apiError("No weight data available", 404);
     }
 
-    const latestWeights = weights.filter(
-      (w) => w.date.getTime() === latestDate.getTime()
-    );
+    const latestDate = weights[0].date;
+    const latestWeights = weights.filter((w) => w.date === latestDate);
 
     // Group by agent
-    const byAgent: Record<number, any> = {};
-    agents.forEach((a) => {
-      byAgent[a.id] = {
-        agentId: a.id,
-        agentName: a.name,
-        riskProfile: a.riskProfile,
-        weights: {},
-      };
-    });
+    const byAgent = agents.map((agent) => {
+      const agentWeights = latestWeights
+        .filter((w) => w.agent_id === agent.id)
+        .reduce((acc, w) => {
+          acc[w.ticker] = {
+            weight: w.weight,
+            reason: w.reason_json,
+          };
+          return acc;
+        }, {} as Record<string, any>);
 
-    latestWeights.forEach((w) => {
-      if (byAgent[w.agentId]) {
-        byAgent[w.agentId].weights[w.ticker] = {
-          weight: w.weight?.toString(),
-          reason: w.reasonJson,
-        };
-      }
+      return {
+        agentId: agent.id,
+        agentName: agent.name,
+        riskProfile: agent.risk_profile,
+        weights: agentWeights,
+      };
     });
 
     return apiSuccess(
       {
-        date: latestDate.toISOString().split("T")[0],
-        agents: Object.values(byAgent),
+        date: latestDate,
+        agents: byAgent,
       },
       "AI Agents Comparison"
     );

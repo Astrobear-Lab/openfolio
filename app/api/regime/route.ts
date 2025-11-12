@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { apiSuccess, apiError, getLatestDate } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
@@ -9,30 +9,29 @@ export async function GET(request: NextRequest) {
   try {
     const targetDate = getLatestDate(dateParam);
 
-    const regime = await prisma.macroRegimeDaily.findFirst({
-      where: {
-        date: {
-          lte: targetDate,
-        },
-      },
-      orderBy: { date: "desc" },
-    });
+    const { data: regime, error } = await supabase
+      .from("macro_regime_daily")
+      .select("*")
+      .lte("date", targetDate.toISOString().split("T")[0])
+      .order("date", { ascending: false })
+      .limit(1)
+      .single();
 
-    if (!regime) {
+    if (error || !regime) {
       return apiError("No regime data available", 404);
     }
 
     return apiSuccess(
       {
-        date: regime.date.toISOString().split("T")[0],
+        date: regime.date,
         regime: regime.regime,
         inputs: {
-          growthZ: regime.growthZ?.toString(),
-          inflationZ: regime.inflationZ?.toString(),
-          liquidityZ: regime.liquidityZ?.toString(),
-          ratesZ: regime.ratesZ?.toString(),
+          growthZ: regime.growth_z,
+          inflationZ: regime.inflation_z,
+          liquidityZ: regime.liquidity_z,
+          ratesZ: regime.rates_z,
         },
-        details: regime.detailsJson,
+        details: regime.details_json,
       },
       "Regime classification engine"
     );

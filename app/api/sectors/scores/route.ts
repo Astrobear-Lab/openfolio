@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { apiSuccess, apiError, getLatestDate } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
@@ -9,32 +9,28 @@ export async function GET(request: NextRequest) {
   try {
     const targetDate = getLatestDate(dateParam);
 
-    const scores = await prisma.sectorScore.findMany({
-      where: {
-        date: {
-          lte: targetDate,
-        },
-      },
-      orderBy: [{ date: "desc" }, { score: "desc" }],
-      take: 20, // Assume ~11 sectors
-    });
+    const { data: scores, error } = await supabase
+      .from("sector_scores")
+      .select("*")
+      .lte("date", targetDate.toISOString().split("T")[0])
+      .order("date", { ascending: false })
+      .order("score", { ascending: false })
+      .limit(20);
 
-    if (scores.length === 0) {
+    if (error || !scores || scores.length === 0) {
       return apiError("No sector scores available", 404);
     }
 
     const latestDate = scores[0].date;
-    const latestScores = scores.filter(
-      (s) => s.date.getTime() === latestDate.getTime()
-    );
+    const latestScores = scores.filter((s) => s.date === latestDate);
 
     return apiSuccess(
       {
-        date: latestDate.toISOString().split("T")[0],
+        date: latestDate,
         sectors: latestScores.map((s) => ({
           sector: s.sector,
-          score: s.score?.toString(),
-          components: s.componentsJson,
+          score: s.score,
+          components: s.components_json,
         })),
       },
       "Sector scoring engine"
