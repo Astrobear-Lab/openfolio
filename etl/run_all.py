@@ -517,10 +517,8 @@ def main():
 
     except Exception as e:
         logger.error(f"\n❌ ETL Pipeline Failed: {e}", exc_info=True)
-        conn.rollback()
+        # Supabase client doesn't have rollback/close - REST API auto-commits
         sys.exit(1)
-    finally:
-        conn.close()
 
 
 if __name__ == "__main__":
