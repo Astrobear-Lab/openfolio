@@ -148,40 +148,50 @@ def run_events_etl(conn, config):
         for ticker, filings in all_filings.items():
             for filing in filings:
                 try:
-                    with conn.cursor() as cur:
-                        # Insert event doc
-                        cur.execute(
-                            """
-                            INSERT INTO event_docs (ticker, dt, type, url, title, body)
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (ticker, dt, type) DO UPDATE
-                            SET url = EXCLUDED.url, title = EXCLUDED.title, body = EXCLUDED.body
-                            RETURNING id
-                            """,
-                            (filing["ticker"], filing["dt"], filing["type"],
-                             filing["url"], filing["title"], filing["body"])
-                        )
-                        doc_id = cur.fetchone()[0]
+                    # Upsert event doc
+                    event_data = {
+                        "ticker": filing["ticker"],
+                        "dt": filing["dt"].isoformat() if hasattr(filing["dt"], "isoformat") else filing["dt"],
+                        "type": filing["type"],
+                        "url": filing["url"],
+                        "title": filing["title"],
+                        "body": filing["body"]
+                    }
 
-                        # Store basic NLP placeholder (real NLP would use OpenAI)
-                        cur.execute(
-                            """
-                            INSERT INTO event_nlp
-                            (doc_id, sentiment, guidance, surprise_eps, topics, quotes, model, version)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (doc_id) DO UPDATE
-                            SET sentiment = EXCLUDED.sentiment
-                            """,
-                            (doc_id, 0.0, None, None, [],
-                             json.dumps({"filing_type": filing["type"]}),
-                             "placeholder", "1.0.0")
-                        )
+                    result = conn.table("event_docs").upsert(
+                        event_data,
+                        on_conflict="ticker,dt,type"
+                    ).execute()
+
+                    if result.data and len(result.data) > 0:
+                        doc_id = result.data[0]["id"]
+                    else:
+                        # Fetch the doc_id if upsert didn't return it
+                        fetch_result = conn.table("event_docs").select("id").match({
+                            "ticker": filing["ticker"],
+                            "dt": event_data["dt"],
+                            "type": filing["type"]
+                        }).execute()
+                        doc_id = fetch_result.data[0]["id"] if fetch_result.data else None
+
+                    if doc_id:
+                        # Store basic NLP placeholder
+                        nlp_data = {
+                            "doc_id": doc_id,
+                            "sentiment": 0.0,
+                            "guidance": None,
+                            "surprise_eps": None,
+                            "topics": [],
+                            "quotes": {"filing_type": filing["type"]},
+                            "model": "placeholder",
+                            "version": "1.0.0"
+                        }
+                        conn.table("event_nlp").upsert(nlp_data, on_conflict="doc_id").execute()
 
                 except Exception as e:
                     logger.error(f"  ✗ Failed to store filing for {ticker}: {e}")
                     continue
 
-        conn.commit()
         logger.info(f"  ✓ Processed filings for {len(all_filings)} tickers")
 
     except Exception as e:
@@ -336,15 +346,8 @@ def run_sector_scoring_etl(conn, config):
     scorer = SectorScorer()
 
     # Get latest regime
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT regime FROM macro_regime_daily
-            ORDER BY date DESC LIMIT 1
-            """
-        )
-        result = cur.fetchone()
-        regime = result[0] if result else "Goldilocks"
+    result = conn.table("macro_regime_daily").select("regime").order("date", desc=True).limit(1).execute()
+    regime = result.data[0]["regime"] if result.data else "Goldilocks"
 
     logger.info(f"  Current regime: {regime}")
 
@@ -388,31 +391,22 @@ def run_ai_allocation_etl(conn, config):
     today = date.today()
 
     # Get AI agents
-    with conn.cursor() as cur:
-        cur.execute("SELECT id, name, risk_profile FROM ai_agents ORDER BY id")
-        agents = cur.fetchall()
+    agents_result = conn.table("ai_agents").select("id, name, risk_profile").order("id").execute()
+    agents = [(a["id"], a["name"], a["risk_profile"]) for a in agents_result.data] if agents_result.data else []
 
     # Get latest regime
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT regime FROM macro_regime_daily
-            ORDER BY date DESC LIMIT 1
-            """
-        )
-        result = cur.fetchone()
-        regime = result[0] if result else "Goldilocks"
+    regime_result = conn.table("macro_regime_daily").select("regime").order("date", desc=True).limit(1).execute()
+    regime = regime_result.data[0]["regime"] if regime_result.data else "Goldilocks"
 
     # Get top sector scores
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT sector, score FROM sector_scores
-            WHERE date = (SELECT MAX(date) FROM sector_scores)
-            ORDER BY score DESC LIMIT 5
-            """
-        )
-        top_sectors = cur.fetchall()
+    # First get the latest date
+    latest_date_result = conn.table("sector_scores").select("date").order("date", desc=True).limit(1).execute()
+    if latest_date_result.data:
+        latest_date = latest_date_result.data[0]["date"]
+        top_sectors_result = conn.table("sector_scores").select("sector, score").eq("date", latest_date).order("score", desc=True).limit(5).execute()
+        top_sectors = [(s["sector"], s["score"]) for s in top_sectors_result.data] if top_sectors_result.data else []
+    else:
+        top_sectors = []
 
     logger.info(f"  Regime: {regime}, Top sectors: {[s[0] for s in top_sectors]}")
 

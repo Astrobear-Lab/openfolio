@@ -53,11 +53,12 @@ pip install -r requirements.txt
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the project root with:
+Create a `.env` file in the project root with your Supabase credentials:
 
 ```bash
-# Database
-DATABASE_URL="postgresql://user:password@host:5432/dbname"
+# Supabase (Required - get from Supabase dashboard)
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key-here"
 
 # API Keys
 FRED_API_KEY="your_fred_api_key"          # Get from: https://fred.stlouisfed.org/
@@ -65,20 +66,32 @@ ALPHA_VANTAGE_API_KEY="your_av_key"       # (Optional)
 FMP_API_KEY="your_fmp_key"                # (Optional)
 OPENAI_API_KEY="your_openai_key"          # (Optional)
 
-# SEC User-Agent (required by SEC)
+# SEC User-Agent (required by SEC EDGAR)
 SEC_USER_AGENT="YourApp contact@email.com"
-
-# Optional: Use seed data instead of real APIs
-USE_SEED_DATA="false"
 ```
+
+**Getting Supabase Credentials:**
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project
+3. Go to **Settings** → **API**
+4. Copy:
+   - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon` `public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ### 3. Initialize Database
 
-Run the SQL schema:
+The ETL pipeline uses **Supabase Cloud** directly via the REST API.
+
+Make sure your Supabase database has the schema initialized:
+
+1. Go to Supabase dashboard → SQL Editor
+2. Run the contents of `supabase/schema.sql`
+3. Run the contents of `supabase/seed.sql`
+
+Or use the Supabase CLI:
 
 ```bash
-psql $DATABASE_URL < ../supabase/schema.sql
-psql $DATABASE_URL < ../supabase/seed.sql
+supabase db push
 ```
 
 ## Usage
