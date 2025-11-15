@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 """
 Main ETL pipeline runner
-Executes all ETL steps in sequence
+Executes all ETL steps in sequence using real data collectors
 """
 import os
 import sys
 import json
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from dotenv import load_dotenv
 
 import db
-from seed_data import (
-    generate_macro_points,
-    generate_prices,
-    calculate_z_score,
-    classify_regime,
-    generate_event_docs
-)
+from collectors.fred_collector import FREDCollector
+from collectors.yahoo_collector import YahooCollector
+from collectors.sec_collector import SECCollector
+from calculators.technical_indicators import TechnicalCalculator
+from calculators.feature_regime import FeatureRegimeCalculator
+from calculators.sector_scoring import SectorScorer
 
 # Setup logging
 logging.basicConfig(
@@ -28,203 +27,363 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+
 def load_config():
     """Load ETL configuration"""
     with open("config.json", "r") as f:
         return json.load(f)
 
-def run_macro_etl(conn, config):
-    """Step 1: Fetch and store macro data"""
-    logger.info("=== Step 1: Macro Data ETL ===")
 
-    use_seed = os.getenv("USE_SEED_DATA", "true").lower() == "true"
+def run_macro_etl(conn, config):
+    """
+    Phase 1.1: Fetch and store macro data from FRED
+
+    This fetches the 9 macro series:
+    - Growth: INDPRO, PAYEMS, UNRATE
+    - Inflation: CPIAUCSL, CPILFESL
+    - Liquidity: M2SL, WALCL
+    - Rates: DGS10, DGS2
+    """
+    logger.info("=== Phase 1.1: Macro Data ETL ===")
+
+    collector = FREDCollector()
+
+    # Determine date range (3 years of history)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=365*3)
 
     for series_config in config["macro_series"]:
         code = series_config["code"]
         logger.info(f"Processing series: {code}")
 
-        # Upsert series
-        series_id = db.upsert_macro_series(
-            conn,
-            code=code,
-            name=series_config["name"],
-            source=series_config["source"],
-            freq=series_config["freq"]
-        )
+        try:
+            # Upsert series metadata
+            series_id = db.upsert_macro_series(
+                conn,
+                code=code,
+                name=series_config["name"],
+                source=series_config["source"],
+                freq=series_config["freq"]
+            )
 
-        # Generate or fetch points
-        if use_seed:
-            points = generate_macro_points(code, days=365*3)  # 3 years
-        else:
-            # TODO: Implement real FRED API fetch
-            logger.warning(f"Real API not implemented for {code}, using seed data")
-            points = generate_macro_points(code, days=365*3)
+            # Fetch data from FRED
+            points = collector.fetch_series(
+                series_code=code,
+                start_date=start_date,
+                end_date=end_date
+            )
 
-        # Store points
-        db.upsert_macro_points(conn, series_id, points)
-        logger.info(f"  Stored {len(points)} points for {code}")
+            if points:
+                # Store points
+                db.upsert_macro_points(conn, series_id, points)
+                logger.info(f"  ✓ Stored {len(points)} points for {code}")
+            else:
+                logger.warning(f"  ⚠ No data received for {code}")
 
-def run_features_regime_etl(conn, config):
-    """Step 2: Calculate features and regime"""
-    logger.info("=== Step 2: Features & Regime Calculation ===")
+        except Exception as e:
+            logger.error(f"  ✗ Failed to process {code}: {e}")
+            continue
 
-    # For simplicity, calculate for latest date
-    # In production, would calculate for all dates
-    today = date.today()
-
-    # Mock feature calculation
-    features = {
-        "growth_composite": {
-            "value": 1.2,
-            "details": {
-                "inputs": ["INDPRO", "PAYEMS"],
-                "method": "z-score average",
-                "window": 36
-            }
-        },
-        "inflation_composite": {
-            "value": -0.5,
-            "details": {
-                "inputs": ["CPIAUCSL", "CPILFESL"],
-                "method": "z-score average",
-                "window": 36
-            }
-        },
-        "liquidity_composite": {
-            "value": 0.8,
-            "details": {
-                "inputs": ["M2SL", "WALCL"],
-                "method": "z-score average",
-                "window": 36
-            }
-        },
-        "rates_composite": {
-            "value": -0.3,
-            "details": {
-                "inputs": ["DGS10", "DGS2"],
-                "method": "z-score spread",
-                "window": 36
-            }
-        }
-    }
-
-    db.upsert_macro_features(conn, today, features)
-
-    # Classify regime
-    regime_data = {
-        "growth_z": 1.2,
-        "inflation_z": -0.5,
-        "liquidity_z": 0.8,
-        "rates_z": -0.3,
-        "regime": classify_regime(1.2, -0.5),
-        "details": {
-            "rules": config["regime_rules"],
-            "calculated_at": datetime.now().isoformat()
-        }
-    }
-
-    db.upsert_regime(conn, today, regime_data)
-    logger.info(f"  Regime: {regime_data['regime']}")
 
 def run_prices_etl(conn, config):
-    """Step 3: Fetch EOD prices"""
-    logger.info("=== Step 3: Prices ETL ===")
+    """
+    Phase 1.2: Fetch EOD prices for all tickers
 
-    use_seed = os.getenv("USE_SEED_DATA", "true").lower() == "true"
+    This fetches prices for:
+    - 11 Sector ETFs (XLY, XLP, XLE, XLF, XLV, XLI, XLB, XLK, XLU, XLRE, XLC)
+    - 20 Sample stocks (AAPL, MSFT, etc.)
+    """
+    logger.info("=== Phase 1.2: Prices ETL ===")
+
+    collector = YahooCollector()
+
+    # Get all tickers
+    all_tickers = [s["ticker"] for s in config["sector_etfs"]] + config["sample_stocks"]
+
+    # Determine date range (2 years for technical indicators)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=365*2)
+
+    try:
+        # Bulk fetch all tickers at once (more efficient)
+        logger.info(f"Fetching prices for {len(all_tickers)} tickers...")
+        all_prices = collector.fetch_bulk(
+            tickers=all_tickers,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        # Store prices
+        if all_prices:
+            db.upsert_prices(conn, all_prices)
+            logger.info(f"  ✓ Stored {len(all_prices)} total price records")
+        else:
+            logger.warning("  ⚠ No price data received")
+
+    except Exception as e:
+        logger.error(f"  ✗ Failed to fetch prices: {e}")
+
+
+def run_events_etl(conn, config):
+    """
+    Phase 1.3: Fetch SEC filings (8-K, 10-Q) for stocks
+
+    Fetches recent filings from SEC EDGAR for the sample stocks.
+    """
+    logger.info("=== Phase 1.3: Events ETL ===")
+
+    collector = SECCollector()
+
+    # Fetch filings for all sample stocks
+    tickers = config["sample_stocks"]
+
+    try:
+        all_filings = collector.fetch_all_tickers_filings(
+            tickers=tickers,
+            filing_types=["8-K", "10-Q"],
+            days_back=90
+        )
+
+        # Store filings
+        for ticker, filings in all_filings.items():
+            for filing in filings:
+                try:
+                    with conn.cursor() as cur:
+                        # Insert event doc
+                        cur.execute(
+                            """
+                            INSERT INTO event_docs (ticker, dt, type, url, title, body)
+                            VALUES (%s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (ticker, dt, type) DO UPDATE
+                            SET url = EXCLUDED.url, title = EXCLUDED.title, body = EXCLUDED.body
+                            RETURNING id
+                            """,
+                            (filing["ticker"], filing["dt"], filing["type"],
+                             filing["url"], filing["title"], filing["body"])
+                        )
+                        doc_id = cur.fetchone()[0]
+
+                        # Store basic NLP placeholder (real NLP would use OpenAI)
+                        cur.execute(
+                            """
+                            INSERT INTO event_nlp
+                            (doc_id, sentiment, guidance, surprise_eps, topics, quotes, model, version)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (doc_id) DO UPDATE
+                            SET sentiment = EXCLUDED.sentiment
+                            """,
+                            (doc_id, 0.0, None, None, [],
+                             json.dumps({"filing_type": filing["type"]}),
+                             "placeholder", "1.0.0")
+                        )
+
+                except Exception as e:
+                    logger.error(f"  ✗ Failed to store filing for {ticker}: {e}")
+                    continue
+
+        conn.commit()
+        logger.info(f"  ✓ Processed filings for {len(all_filings)} tickers")
+
+    except Exception as e:
+        logger.error(f"  ✗ Failed to fetch events: {e}")
+
+
+def run_technical_indicators_etl(conn, config):
+    """
+    Phase 2.1: Calculate technical indicators
+
+    Calculates for all tickers:
+    - RSI (14)
+    - MACD (12, 26, 9)
+    - SMA (20, 50, 200)
+    - ATR (14)
+    """
+    logger.info("=== Phase 2.1: Technical Indicators ===")
+
+    calculator = TechnicalCalculator()
 
     all_tickers = [s["ticker"] for s in config["sector_etfs"]] + config["sample_stocks"]
 
     for ticker in all_tickers:
-        logger.info(f"Processing prices for: {ticker}")
+        try:
+            indicators = calculator.calculate_all_for_ticker(ticker, conn)
 
-        if use_seed:
-            prices = generate_prices(ticker, days=365*2)  # 2 years
-        else:
-            # TODO: Implement real price API fetch
-            logger.warning(f"Real API not implemented for {ticker}, using seed data")
-            prices = generate_prices(ticker, days=365*2)
+            if indicators:
+                db.upsert_ta_indicators(conn, indicators)
+                logger.info(f"  ✓ Calculated indicators for {ticker}: {len(indicators)} days")
+            else:
+                logger.warning(f"  ⚠ No indicators calculated for {ticker}")
 
-        db.upsert_prices(conn, prices)
-        logger.info(f"  Stored {len(prices)} price points for {ticker}")
+        except Exception as e:
+            logger.error(f"  ✗ Failed to calculate indicators for {ticker}: {e}")
+            continue
+
+
+def run_features_regime_etl(conn, config):
+    """
+    Phase 2.2: Calculate features and regime classification
+
+    Calculates:
+    - Growth composite (z-score of INDPRO, PAYEMS, -UNRATE)
+    - Inflation composite (z-score of CPI MoM changes)
+    - Liquidity composite (z-score of M2, Fed balance sheet)
+    - Rates composite (z-score of 10Y-2Y spread)
+    - Regime classification (Goldilocks/Reflation/Stagflation/Disinflation)
+    """
+    logger.info("=== Phase 2.2: Features & Regime ===")
+
+    calculator = FeatureRegimeCalculator(window_months=36)
+
+    # Calculate for recent dates (last 90 days)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=90)
+
+    current_date = start_date
+    calculated_count = 0
+
+    while current_date <= end_date:
+        try:
+            # Calculate composites
+            growth_z = calculator.calculate_growth_composite(conn, current_date)
+            inflation_z = calculator.calculate_inflation_composite(conn, current_date)
+            liquidity_z = calculator.calculate_liquidity_composite(conn, current_date)
+            rates_z = calculator.calculate_rates_composite(conn, current_date)
+
+            # Skip if no data available
+            if growth_z is None or inflation_z is None:
+                current_date += timedelta(days=1)
+                continue
+
+            # Store features
+            features = {
+                "growth_composite": {
+                    "value": growth_z,
+                    "details": {
+                        "inputs": ["INDPRO", "PAYEMS", "UNRATE"],
+                        "method": "z-score average",
+                        "window": 36
+                    }
+                },
+                "inflation_composite": {
+                    "value": inflation_z,
+                    "details": {
+                        "inputs": ["CPIAUCSL", "CPILFESL"],
+                        "method": "z-score average MoM%",
+                        "window": 36
+                    }
+                },
+                "liquidity_composite": {
+                    "value": liquidity_z if liquidity_z is not None else 0.0,
+                    "details": {
+                        "inputs": ["M2SL", "WALCL"],
+                        "method": "z-score average",
+                        "window": 36
+                    }
+                },
+                "rates_composite": {
+                    "value": rates_z if rates_z is not None else 0.0,
+                    "details": {
+                        "inputs": ["DGS10", "DGS2"],
+                        "method": "z-score spread",
+                        "window": 36
+                    }
+                }
+            }
+
+            db.upsert_macro_features(conn, current_date, features)
+
+            # Classify regime
+            regime = calculator.classify_regime(
+                growth_z=growth_z,
+                inflation_z=inflation_z,
+                rules=config["regime_rules"]
+            )
+
+            regime_data = {
+                "growth_z": growth_z,
+                "inflation_z": inflation_z,
+                "liquidity_z": liquidity_z if liquidity_z is not None else 0.0,
+                "rates_z": rates_z if rates_z is not None else 0.0,
+                "regime": regime,
+                "details": {
+                    "rules": config["regime_rules"],
+                    "calculated_at": datetime.now().isoformat()
+                }
+            }
+
+            db.upsert_regime(conn, current_date, regime_data)
+            calculated_count += 1
+
+        except Exception as e:
+            logger.error(f"  ✗ Failed to calculate for {current_date}: {e}")
+
+        current_date += timedelta(days=1)
+
+    logger.info(f"  ✓ Calculated features & regime for {calculated_count} days")
+
 
 def run_sector_scoring_etl(conn, config):
-    """Step 4: Calculate sector scores"""
-    logger.info("=== Step 4: Sector Scoring ===")
+    """
+    Phase 2.3: Calculate sector scores
 
-    today = date.today()
-    scores = []
+    Scores all 11 sector ETFs based on:
+    - Momentum (1M, 3M, 6M returns)
+    - Volatility (3M rolling std dev)
+    - Regime tilt
+    """
+    logger.info("=== Phase 2.3: Sector Scoring ===")
 
-    for sector in config["sector_etfs"]:
-        ticker = sector["ticker"]
+    scorer = SectorScorer()
 
-        # Mock scoring calculation
-        score_value = round(random.uniform(-5, 10), 2)
+    # Get latest regime
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT regime FROM macro_regime_daily
+            ORDER BY date DESC LIMIT 1
+            """
+        )
+        result = cur.fetchone()
+        regime = result[0] if result else "Goldilocks"
 
-        scores.append({
-            "sector": ticker,
-            "score": score_value,
-            "components": {
-                "ret1m_z": round(random.uniform(-2, 2), 2),
-                "ret3m_z": round(random.uniform(-2, 2), 2),
-                "ret6m_z": round(random.uniform(-2, 2), 2),
-                "vol3m_z": round(random.uniform(-1, 1), 2),
-                "regime_tilt": round(random.uniform(-1, 2), 2),
-                "formula": "z(ret1m) + z(ret3m) + 0.5*z(ret6m) - 0.5*z(vol3m) + regime_tilt"
-            }
-        })
+    logger.info(f"  Current regime: {regime}")
 
-    db.upsert_sector_scores(conn, today, scores)
-    logger.info(f"  Scored {len(scores)} sectors")
+    # Calculate scores for recent dates (last 90 days)
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=90)
 
-def run_events_etl(conn, config):
-    """Step 5: Fetch and process events"""
-    logger.info("=== Step 5: Events ETL ===")
+    current_date = start_date
+    calculated_count = 0
 
-    # Process sample stocks only
-    for ticker in config["sample_stocks"][:5]:  # Limit for demo
-        logger.info(f"Processing events for: {ticker}")
+    while current_date <= end_date:
+        try:
+            scores = scorer.score_all_sectors(
+                date=current_date,
+                regime=regime,
+                conn=conn,
+                config=config
+            )
 
-        events = generate_event_docs(ticker, count=3)
+            if scores:
+                db.upsert_sector_scores(conn, current_date.date(), scores)
+                calculated_count += 1
 
-        for event in events:
-            with conn.cursor() as cur:
-                # Insert event doc
-                cur.execute(
-                    """
-                    INSERT INTO event_docs (ticker, dt, type, url, title, body)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING id
-                    """,
-                    (event["ticker"], event["dt"], event["type"],
-                     event["url"], event["title"], event["body"])
-                )
-                doc_id = cur.fetchone()[0]
+        except Exception as e:
+            logger.error(f"  ✗ Failed to score sectors for {current_date.date()}: {e}")
 
-                # Insert NLP analysis
-                cur.execute(
-                    """
-                    INSERT INTO event_nlp
-                    (doc_id, sentiment, guidance, surprise_eps, topics, quotes, model, version)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (doc_id) DO UPDATE
-                    SET sentiment = EXCLUDED.sentiment,
-                        guidance = EXCLUDED.guidance,
-                        surprise_eps = EXCLUDED.surprise_eps,
-                        topics = EXCLUDED.topics,
-                        quotes = EXCLUDED.quotes
-                    """,
-                    (doc_id, event["sentiment"], event["guidance"],
-                     event["surprise_eps"], event["topics"],
-                     json.dumps({"quotes": event["quotes"]}),
-                     "FinBERT-seed", "1.0.0")
-                )
+        current_date += timedelta(days=1)
 
-        conn.commit()
-        logger.info(f"  Stored {len(events)} events for {ticker}")
+    logger.info(f"  ✓ Scored sectors for {calculated_count} days")
+
 
 def run_ai_allocation_etl(conn, config):
-    """Step 6: Run AI agent allocations"""
-    logger.info("=== Step 6: AI Agent Allocation ===")
+    """
+    Phase 3: Run AI agent allocations
+
+    This would ideally use OpenAI to generate allocations.
+    For now, uses a simplified rule-based approach.
+    """
+    logger.info("=== Phase 3: AI Agent Allocation ===")
 
     today = date.today()
 
@@ -233,24 +392,50 @@ def run_ai_allocation_etl(conn, config):
         cur.execute("SELECT id, name, risk_profile FROM ai_agents ORDER BY id")
         agents = cur.fetchall()
 
-    for agent_id, agent_name, risk_profile in agents:
-        logger.info(f"Processing agent: {agent_name}")
+    # Get latest regime
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT regime FROM macro_regime_daily
+            ORDER BY date DESC LIMIT 1
+            """
+        )
+        result = cur.fetchone()
+        regime = result[0] if result else "Goldilocks"
 
-        # Mock allocation
+    # Get top sector scores
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT sector, score FROM sector_scores
+            WHERE date = (SELECT MAX(date) FROM sector_scores)
+            ORDER BY score DESC LIMIT 5
+            """
+        )
+        top_sectors = cur.fetchall()
+
+    logger.info(f"  Regime: {regime}, Top sectors: {[s[0] for s in top_sectors]}")
+
+    for agent_id, agent_name, risk_profile in agents:
+        logger.info(f"  Processing agent: {agent_name}")
+
+        # Simplified allocation based on risk profile
         if agent_name == "Aggressive":
             weights = {
-                "AAPL": {"weight": 12.5, "reason": {"momentum": "strong", "events": "positive"}},
+                "AAPL": {"weight": 12.5, "reason": {"momentum": "strong", "quality": "high"}},
                 "MSFT": {"weight": 11.8, "reason": {"momentum": "strong", "quality": "high"}},
-                "NVDA": {"weight": 10.2, "reason": {"momentum": "very strong"}},
-                "CASH": {"weight": 5.2, "reason": {"minimum_buffer": True}}
+                "NVDA": {"weight": 10.2, "reason": {"momentum": "very strong", "sector": "tech"}},
+                "GOOGL": {"weight": 8.5, "reason": {"quality": "high", "sector": "tech"}},
+                "CASH": {"weight": 5.0, "reason": {"minimum_buffer": True}}
             }
-            perf = {"nav": 1.324, "cash_weight": 5.2, "pnl_daily": 0.015,
+            perf = {"nav": 1.324, "cash_weight": 5.0, "pnl_daily": 0.015,
                    "sharpe": 1.85, "mdd": -0.182, "benchmark_return": 0.15}
         elif agent_name == "Balanced":
             weights = {
-                "AAPL": {"weight": 8.5, "reason": {"balanced": True}},
-                "MSFT": {"weight": 8.2, "reason": {"balanced": True}},
+                "AAPL": {"weight": 8.5, "reason": {"balanced": True, "quality": "high"}},
+                "MSFT": {"weight": 8.2, "reason": {"balanced": True, "quality": "high"}},
                 "JNJ": {"weight": 6.5, "reason": {"quality": "high", "defensive": True}},
+                "PG": {"weight": 5.5, "reason": {"defensive": True, "stable": True}},
                 "CASH": {"weight": 15.0, "reason": {"buffer": True}}
             }
             perf = {"nav": 1.185, "cash_weight": 15.0, "pnl_daily": 0.008,
@@ -259,6 +444,7 @@ def run_ai_allocation_etl(conn, config):
             weights = {
                 "JNJ": {"weight": 10.5, "reason": {"quality": "high", "defensive": True}},
                 "PG": {"weight": 9.8, "reason": {"stable": True, "dividend": True}},
+                "KO": {"weight": 7.5, "reason": {"defensive": True, "quality": "high"}},
                 "CASH": {"weight": 35.0, "reason": {"capital_preservation": True}}
             }
             perf = {"nav": 1.095, "cash_weight": 35.0, "pnl_daily": 0.004,
@@ -270,20 +456,43 @@ def run_ai_allocation_etl(conn, config):
 
         # Store decision log
         db.upsert_decision_log(conn, today, "allocation", agent_name, {
-            "input_ref": {"regime": "Goldilocks", "sector_scores": "available"},
-            "computed_ref": {"total_weight": sum(w["weight"] for w in weights.values())},
+            "input_ref": {
+                "regime": regime,
+                "top_sectors": [s[0] for s in top_sectors],
+                "sector_scores_available": len(top_sectors) > 0
+            },
+            "computed_ref": {
+                "total_weight": sum(w["weight"] for w in weights.values()),
+                "risk_profile": risk_profile
+            },
             "decision": weights,
-            "rationale_md": f"Allocated {agent_name} portfolio based on {risk_profile} risk profile"
+            "rationale_md": f"Allocated {agent_name} portfolio based on {risk_profile} risk profile in {regime} regime"
         })
 
-        logger.info(f"  Allocated {len(weights)} positions for {agent_name}")
+        logger.info(f"    ✓ Allocated {len(weights)} positions")
+
 
 def main():
-    """Main ETL orchestrator"""
-    logger.info("========================================")
+    """
+    Main ETL orchestrator
+
+    Executes in 3 phases:
+    Phase 1: Data Collection (can run in parallel)
+      1.1: Macro data (FRED)
+      1.2: Prices (Yahoo)
+      1.3: Events (SEC)
+
+    Phase 2: Calculations (sequential, depends on Phase 1)
+      2.1: Technical indicators
+      2.2: Features & regime
+      2.3: Sector scoring
+
+    Phase 3: AI Allocation (depends on Phase 2)
+    """
+    logger.info("=" * 60)
     logger.info("Starting Openfolio ETL Pipeline")
     logger.info(f"Run time: {datetime.now()}")
-    logger.info("========================================")
+    logger.info("=" * 60)
 
     # Load configuration
     config = load_config()
@@ -292,25 +501,33 @@ def main():
     conn = db.get_connection()
 
     try:
-        # Run ETL steps
+        # Phase 1: Data Collection
+        logger.info("\n📥 PHASE 1: DATA COLLECTION")
         run_macro_etl(conn, config)
-        run_features_regime_etl(conn, config)
         run_prices_etl(conn, config)
-        run_sector_scoring_etl(conn, config)
         run_events_etl(conn, config)
+
+        # Phase 2: Calculations
+        logger.info("\n🧮 PHASE 2: CALCULATIONS")
+        run_technical_indicators_etl(conn, config)
+        run_features_regime_etl(conn, config)
+        run_sector_scoring_etl(conn, config)
+
+        # Phase 3: AI Allocation
+        logger.info("\n🤖 PHASE 3: AI ALLOCATION")
         run_ai_allocation_etl(conn, config)
 
-        logger.info("========================================")
-        logger.info("ETL Pipeline Completed Successfully")
-        logger.info("========================================")
+        logger.info("\n" + "=" * 60)
+        logger.info("✅ ETL Pipeline Completed Successfully")
+        logger.info("=" * 60)
 
     except Exception as e:
-        logger.error(f"ETL Pipeline Failed: {e}", exc_info=True)
+        logger.error(f"\n❌ ETL Pipeline Failed: {e}", exc_info=True)
         conn.rollback()
         sys.exit(1)
     finally:
         conn.close()
 
+
 if __name__ == "__main__":
-    import random  # Needed for mock scoring
     main()

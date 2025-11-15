@@ -153,6 +153,48 @@ def upsert_sector_scores(conn, date, scores: List[Dict[str, Any]]):
             )
     conn.commit()
 
+def upsert_ta_indicators(conn, indicators: List[Dict[str, Any]]):
+    """Bulk upsert technical indicators"""
+    if not indicators:
+        return
+
+    with conn.cursor() as cur:
+        values = [
+            (
+                ind["ticker"],
+                ind["date"],
+                ind.get("rsi_14"),
+                ind.get("macd_12_26_9"),
+                ind.get("macd_signal"),
+                ind.get("sma_20"),
+                ind.get("sma_50"),
+                ind.get("sma_200"),
+                ind.get("atr_14"),
+                Json(ind.get("details_json", {}))
+            )
+            for ind in indicators
+        ]
+
+        execute_values(
+            cur,
+            """
+            INSERT INTO ta_daily
+            (ticker, date, rsi_14, macd_12_26_9, macd_signal, sma_20, sma_50, sma_200, atr_14, details_json)
+            VALUES %s
+            ON CONFLICT (ticker, date) DO UPDATE
+            SET rsi_14 = EXCLUDED.rsi_14,
+                macd_12_26_9 = EXCLUDED.macd_12_26_9,
+                macd_signal = EXCLUDED.macd_signal,
+                sma_20 = EXCLUDED.sma_20,
+                sma_50 = EXCLUDED.sma_50,
+                sma_200 = EXCLUDED.sma_200,
+                atr_14 = EXCLUDED.atr_14,
+                details_json = EXCLUDED.details_json
+            """,
+            values
+        )
+    conn.commit()
+
 def upsert_ai_weights(conn, date: datetime, agent_id: int, weights: Dict[str, Dict[str, Any]]):
     """Upsert AI agent weights (including CASH)"""
     with conn.cursor() as cur:
