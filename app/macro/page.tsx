@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { KpiTile } from "@/components/ui/KpiTile";
 import { Badge } from "@/components/ui/Badge";
@@ -8,20 +8,64 @@ import { Button } from "@/components/ui/Button";
 import { EvidenceDrawer } from "@/components/evidence/EvidenceDrawer";
 import { ExternalLink } from "lucide-react";
 
+interface RegimeData {
+  date: string;
+  regime: string;
+  inputs: {
+    growthZ: number;
+    inflationZ: number;
+    liquidityZ: number;
+    ratesZ: number;
+  };
+  details?: any;
+}
+
 export default function MacroLabPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [regime, setRegime] = useState<RegimeData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data - will be replaced with API calls
-  const regime = {
-    date: "2024-11-08",
-    regime: "Goldilocks",
-    inputs: {
-      growthZ: "1.2",
-      inflationZ: "-0.5",
-      liquidityZ: "0.8",
-      ratesZ: "-0.3",
-    },
-  };
+  useEffect(() => {
+    async function fetchRegime() {
+      try {
+        const response = await fetch("/api/regime?date=latest");
+        if (!response.ok) {
+          throw new Error("Failed to fetch regime data");
+        }
+        const result = await response.json();
+        setRegime(result.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRegime();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-text-subtle">Loading macro data...</p>
+      </div>
+    );
+  }
+
+  if (error || !regime) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-2">
+          <p className="text-danger">Error loading regime data</p>
+          <p className="text-sm text-text-subtle">{error}</p>
+          <p className="text-xs text-text-subtle mt-4">
+            Make sure the ETL pipeline has run at least once to populate data.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const evidenceTabs = [
     {
@@ -126,12 +170,21 @@ export default function MacroLabPage() {
         <KpiTile
           label="Current Regime"
           value={regime.regime}
-          delta="Strong"
+          delta="Live"
           positive={true}
         />
-        <KpiTile label="Growth Z-Score" value={regime.inputs.growthZ} />
-        <KpiTile label="Inflation Z-Score" value={regime.inputs.inflationZ} />
-        <KpiTile label="Liquidity Z-Score" value={regime.inputs.liquidityZ} />
+        <KpiTile
+          label="Growth Z-Score"
+          value={regime.inputs.growthZ.toFixed(2)}
+        />
+        <KpiTile
+          label="Inflation Z-Score"
+          value={regime.inputs.inflationZ.toFixed(2)}
+        />
+        <KpiTile
+          label="Liquidity Z-Score"
+          value={regime.inputs.liquidityZ.toFixed(2)}
+        />
       </div>
 
       {/* Regime Card */}
@@ -158,26 +211,46 @@ export default function MacroLabPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-border">
             <div>
               <p className="text-xs text-text-subtle mb-1">Growth Z</p>
-              <p className="text-xl font-mono font-semibold text-positive">
-                +{regime.inputs.growthZ}
+              <p
+                className={`text-xl font-mono font-semibold ${
+                  regime.inputs.growthZ > 0 ? "text-positive" : "text-danger"
+                }`}
+              >
+                {regime.inputs.growthZ > 0 ? "+" : ""}
+                {regime.inputs.growthZ.toFixed(2)}
               </p>
             </div>
             <div>
               <p className="text-xs text-text-subtle mb-1">Inflation Z</p>
-              <p className="text-xl font-mono font-semibold text-text">
-                {regime.inputs.inflationZ}
+              <p
+                className={`text-xl font-mono font-semibold ${
+                  regime.inputs.inflationZ > 0 ? "text-danger" : "text-positive"
+                }`}
+              >
+                {regime.inputs.inflationZ > 0 ? "+" : ""}
+                {regime.inputs.inflationZ.toFixed(2)}
               </p>
             </div>
             <div>
               <p className="text-xs text-text-subtle mb-1">Liquidity Z</p>
-              <p className="text-xl font-mono font-semibold text-positive">
-                +{regime.inputs.liquidityZ}
+              <p
+                className={`text-xl font-mono font-semibold ${
+                  regime.inputs.liquidityZ > 0 ? "text-positive" : "text-danger"
+                }`}
+              >
+                {regime.inputs.liquidityZ > 0 ? "+" : ""}
+                {regime.inputs.liquidityZ.toFixed(2)}
               </p>
             </div>
             <div>
               <p className="text-xs text-text-subtle mb-1">Rates Z</p>
-              <p className="text-xl font-mono font-semibold text-text">
-                {regime.inputs.ratesZ}
+              <p
+                className={`text-xl font-mono font-semibold ${
+                  regime.inputs.ratesZ < 0 ? "text-positive" : "text-danger"
+                }`}
+              >
+                {regime.inputs.ratesZ > 0 ? "+" : ""}
+                {regime.inputs.ratesZ.toFixed(2)}
               </p>
             </div>
           </div>

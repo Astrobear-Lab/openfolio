@@ -1,68 +1,109 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EvidenceDrawer } from "@/components/evidence/EvidenceDrawer";
 
+interface SectorScore {
+  sector: string;
+  score: number;
+  components: {
+    momentum_1m?: number;
+    momentum_3m?: number;
+    momentum_6m?: number;
+    volatility_3m?: number;
+    regime_tilt?: number;
+  };
+}
+
+interface SectorData {
+  date: string;
+  sectors: SectorScore[];
+}
+
+// Sector names mapping
+const SECTOR_NAMES: Record<string, string> = {
+  XLK: "Technology",
+  XLF: "Financials",
+  XLY: "Consumer Discretionary",
+  XLP: "Consumer Staples",
+  XLE: "Energy",
+  XLV: "Healthcare",
+  XLI: "Industrials",
+  XLB: "Materials",
+  XLU: "Utilities",
+  XLRE: "Real Estate",
+  XLC: "Communication Services",
+};
+
 export default function SectorBoardPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
+  const [sectorData, setSectorData] = useState<SectorData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data
-  const sectors = [
-    {
-      sector: "XLK",
-      name: "Technology",
-      score: 8.5,
-      rank: 1,
-      momentum1m: 5.2,
-      momentum3m: 12.8,
-      volatility: 18.5,
-      regimeTilt: "Positive",
-    },
-    {
-      sector: "XLF",
-      name: "Financials",
-      score: 6.3,
-      rank: 2,
-      momentum1m: 3.1,
-      momentum3m: 8.4,
-      volatility: 15.2,
-      regimeTilt: "Positive",
-    },
-    {
-      sector: "XLY",
-      name: "Consumer Discretionary",
-      score: 5.1,
-      rank: 3,
-      momentum1m: 2.8,
-      momentum3m: 6.9,
-      volatility: 16.8,
-      regimeTilt: "Neutral",
-    },
-    {
-      sector: "XLE",
-      name: "Energy",
-      score: -2.3,
-      rank: 10,
-      momentum1m: -4.2,
-      momentum3m: -8.1,
-      volatility: 24.5,
-      regimeTilt: "Negative",
-    },
-    {
-      sector: "XLU",
-      name: "Utilities",
-      score: -3.1,
-      rank: 11,
-      momentum1m: -1.2,
-      momentum3m: -3.5,
-      volatility: 12.1,
-      regimeTilt: "Negative",
-    },
-  ];
+  useEffect(() => {
+    async function fetchSectors() {
+      try {
+        const response = await fetch("/api/sectors/scores?date=latest");
+        if (!response.ok) {
+          throw new Error("Failed to fetch sector scores");
+        }
+        const result = await response.json();
+        setSectorData(result.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSectors();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-text-subtle">Loading sector scores...</p>
+      </div>
+    );
+  }
+
+  if (error || !sectorData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-2">
+          <p className="text-danger">Error loading sector data</p>
+          <p className="text-sm text-text-subtle">{error}</p>
+          <p className="text-xs text-text-subtle mt-4">
+            Make sure the ETL pipeline has run at least once to populate data.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Prepare sectors with names and ranks
+  const sectors = sectorData.sectors
+    .map((s, index) => ({
+      sector: s.sector,
+      name: SECTOR_NAMES[s.sector] || s.sector,
+      score: s.score,
+      rank: index + 1,
+      momentum1m: s.components.momentum_1m || 0,
+      momentum3m: s.components.momentum_3m || 0,
+      volatility: s.components.volatility_3m || 0,
+      regimeTilt:
+        (s.components.regime_tilt || 0) > 1
+          ? "Positive"
+          : (s.components.regime_tilt || 0) < -0.5
+          ? "Negative"
+          : "Neutral",
+    }))
+    .sort((a, b) => b.score - a.score);
 
   const handleViewEvidence = (sector: string) => {
     setSelectedSector(sector);
@@ -163,14 +204,15 @@ export default function SectorBoardPage() {
                     <p className="font-medium">{s.name}</p>
                     <p className="text-xs text-text-subtle">
                       1M: {s.momentum1m > 0 ? "+" : ""}
-                      {s.momentum1m}% • 3M: {s.momentum3m > 0 ? "+" : ""}
-                      {s.momentum3m}%
+                      {s.momentum1m.toFixed(1)}% • 3M: {s.momentum3m > 0 ? "+" : ""}
+                      {s.momentum3m.toFixed(1)}%
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-mono font-semibold text-positive">
-                    +{s.score}
+                    {s.score > 0 ? "+" : ""}
+                    {s.score.toFixed(1)}
                   </p>
                   <Button
                     size="sm"
@@ -200,13 +242,16 @@ export default function SectorBoardPage() {
                   <div>
                     <p className="font-medium">{s.name}</p>
                     <p className="text-xs text-text-subtle">
-                      1M: {s.momentum1m}% • 3M: {s.momentum3m}%
+                      1M: {s.momentum1m > 0 ? "+" : ""}
+                      {s.momentum1m.toFixed(1)}% • 3M: {s.momentum3m > 0 ? "+" : ""}
+                      {s.momentum3m.toFixed(1)}%
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-mono font-semibold text-danger">
-                    {s.score}
+                    {s.score > 0 ? "+" : ""}
+                    {s.score.toFixed(1)}
                   </p>
                   <Button
                     size="sm"
@@ -252,7 +297,7 @@ export default function SectorBoardPage() {
                     }`}
                   >
                     {s.score > 0 ? "+" : ""}
-                    {s.score}
+                    {s.score.toFixed(1)}
                   </td>
                   <td
                     className={`numeric ${
@@ -260,7 +305,7 @@ export default function SectorBoardPage() {
                     }`}
                   >
                     {s.momentum1m > 0 ? "+" : ""}
-                    {s.momentum1m}
+                    {s.momentum1m.toFixed(1)}
                   </td>
                   <td
                     className={`numeric ${
@@ -268,9 +313,9 @@ export default function SectorBoardPage() {
                     }`}
                   >
                     {s.momentum3m > 0 ? "+" : ""}
-                    {s.momentum3m}
+                    {s.momentum3m.toFixed(1)}
                   </td>
-                  <td className="numeric">{s.volatility}</td>
+                  <td className="numeric">{s.volatility.toFixed(1)}</td>
                   <td>
                     <Badge
                       variant={
