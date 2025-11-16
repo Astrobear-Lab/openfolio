@@ -20,6 +20,7 @@ from calculators.technical_indicators import TechnicalCalculator
 from calculators.feature_regime import FeatureRegimeCalculator
 from calculators.sector_scoring import SectorScorer
 from calculators.stock_screener import StockScreener
+from calculators.backtest import run_backtest_for_allocation
 
 # Setup logging
 logging.basicConfig(
@@ -638,18 +639,27 @@ def run_ai_allocation_etl(conn, config):
                 logger.warning(f"    ⚠️  Failed to parse weights, using fallback")
                 weights = _get_fallback_weights(agent_name)
 
-            # Calculate simple performance metrics (placeholder - will be replaced with backtest)
-            total_weight = sum(w["weight"] for w in weights.values())
-            cash_weight = weights.get("CASH", {}).get("weight", 0)
-
-            perf = {
-                "nav": 1.0,  # Will be calculated by backtest
-                "cash_weight": cash_weight,
-                "pnl_daily": 0.0,
-                "sharpe": 0.0,
-                "mdd": 0.0,
-                "benchmark_return": 0.0
-            }
+            # Run backtest to calculate real performance metrics
+            logger.info(f"    Running backtest (1-year lookback)...")
+            try:
+                perf = run_backtest_for_allocation(conn, weights, lookback_days=252)
+                logger.info(f"    ✓ Backtest complete: Return={perf['total_return']:.2%}, Sharpe={perf['sharpe']:.2f}, MDD={perf['mdd']:.2%}")
+            except Exception as e:
+                logger.warning(f"    ⚠️  Backtest failed: {e}, using fallback metrics")
+                total_weight = sum(w["weight"] for w in weights.values())
+                cash_weight = weights.get("CASH", {}).get("weight", 0)
+                perf = {
+                    "nav": 1.0,
+                    "cash_weight": cash_weight,
+                    "pnl_daily": 0.0,
+                    "sharpe": 0.0,
+                    "mdd": 0.0,
+                    "volatility": 0.0,
+                    "total_return": 0.0,
+                    "annualized_return": 0.0,
+                    "benchmark_return": 0.0,
+                    "excess_return": 0.0
+                }
 
             # Store to database
             db.upsert_ai_weights(conn, today, agent_id, weights)
