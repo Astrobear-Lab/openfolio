@@ -10,6 +10,7 @@ import logging
 import argparse
 from datetime import datetime, date, timedelta
 from dotenv import load_dotenv
+from openai import OpenAI
 
 import db
 from collectors.fred_collector import FREDCollector
@@ -560,89 +561,310 @@ def run_screener_etl(conn, config):
 
 def run_ai_allocation_etl(conn, config):
     """
-    Phase 3: Run AI agent allocations
+    Phase 3: Run AI agent allocations using OpenAI GPT-4
 
-    This would ideally use OpenAI to generate allocations.
-    For now, uses a simplified rule-based approach.
+    Generates portfolio allocations using AI with full transparency:
+    - Input: macro regime, sector scores, screener results
+    - Output: stock weights + detailed reasoning for each position
+    - All prompts and responses logged to decision_log table
     """
-    logger.info("=== Phase 3: AI Agent Allocation ===")
+    logger.info("=== Phase 3: AI Agent Allocation (OpenAI GPT-4) ===")
 
     today = date.today()
+
+    # Check for OpenAI API key
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        logger.warning("  ⚠️  OPENAI_API_KEY not found - using fallback rule-based allocation")
+        return _run_fallback_allocation(conn, config, today)
+
+    try:
+        client = OpenAI(api_key=openai_api_key)
+        logger.info("  ✓ OpenAI client initialized")
+    except Exception as e:
+        logger.error(f"  ✗ Failed to initialize OpenAI: {e}")
+        return _run_fallback_allocation(conn, config, today)
+
+    # Fetch context data
+    context = _fetch_allocation_context(conn)
+
+    # Get AI agents
+    agents_result = conn.table("ai_agents").select("id, name, risk_profile, description").order("id").execute()
+    agents = agents_result.data if agents_result.data else []
+
+    if not agents:
+        logger.warning("  ⚠️  No AI agents found in database")
+        return
+
+    logger.info(f"  Context: Regime={context['regime']}, Top Sectors={context['top_sectors'][:3]}")
+    logger.info(f"  Processing {len(agents)} AI agents...")
+
+    for agent in agents:
+        agent_id = agent["id"]
+        agent_name = agent["name"]
+        risk_profile = agent["risk_profile"]
+
+        logger.info(f"\n  🤖 Agent: {agent_name} ({risk_profile})")
+
+        try:
+            # Build prompt
+            prompt = _build_allocation_prompt(agent, context)
+
+            # Call OpenAI
+            logger.info(f"    Calling GPT-4...")
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a quantitative portfolio manager with expertise in macro-driven top-down investing. You provide detailed, transparent reasoning for every decision."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.7,
+                max_tokens=2000
+            )
+
+            ai_response = response.choices[0].message.content
+            logger.info(f"    ✓ Received AI response ({len(ai_response)} chars)")
+
+            # Parse AI response
+            weights = _parse_ai_allocation(ai_response, agent_name)
+
+            if not weights:
+                logger.warning(f"    ⚠️  Failed to parse weights, using fallback")
+                weights = _get_fallback_weights(agent_name)
+
+            # Calculate simple performance metrics (placeholder - will be replaced with backtest)
+            total_weight = sum(w["weight"] for w in weights.values())
+            cash_weight = weights.get("CASH", {}).get("weight", 0)
+
+            perf = {
+                "nav": 1.0,  # Will be calculated by backtest
+                "cash_weight": cash_weight,
+                "pnl_daily": 0.0,
+                "sharpe": 0.0,
+                "mdd": 0.0,
+                "benchmark_return": 0.0
+            }
+
+            # Store to database
+            db.upsert_ai_weights(conn, today, agent_id, weights)
+            db.upsert_ai_performance(conn, today, agent_id, perf)
+
+            # Store decision log with full prompt and response
+            db.upsert_decision_log(conn, today, "allocation", agent_name, {
+                "input_ref": {
+                    "regime": context["regime"],
+                    "regime_details": context["regime_details"],
+                    "top_sectors": context["top_sectors"],
+                    "screener_count": len(context["screener_results"])
+                },
+                "computed_ref": {
+                    "total_weight": total_weight,
+                    "risk_profile": risk_profile,
+                    "model": "gpt-4",
+                    "prompt_length": len(prompt),
+                    "response_length": len(ai_response)
+                },
+                "decision": weights,
+                "rationale_md": ai_response,  # Full AI reasoning
+                "prompt": prompt  # Full prompt for transparency
+            })
+
+            logger.info(f"    ✓ Allocated {len(weights)} positions (Total: {total_weight:.1f}%)")
+
+        except Exception as e:
+            logger.error(f"    ✗ Failed to process agent {agent_name}: {e}")
+            # Continue with next agent
+            continue
+
+    logger.info(f"\n  ✅ AI Allocation Complete")
+
+
+def _fetch_allocation_context(conn):
+    """Fetch all context data needed for AI allocation"""
+    context = {}
+
+    # Get latest regime
+    regime_result = conn.table("macro_regime_daily").select("*").order("date", desc=True).limit(1).execute()
+    if regime_result.data:
+        regime_data = regime_result.data[0]
+        context["regime"] = regime_data["regime"]
+        context["regime_details"] = {
+            "growth_z": regime_data.get("growth_z"),
+            "inflation_z": regime_data.get("inflation_z"),
+            "liquidity_z": regime_data.get("liquidity_z"),
+            "rates_z": regime_data.get("rates_z")
+        }
+    else:
+        context["regime"] = "Unknown"
+        context["regime_details"] = {}
+
+    # Get top sector scores
+    latest_sector_date = conn.table("sector_scores").select("date").order("date", desc=True).limit(1).execute()
+    if latest_sector_date.data:
+        latest_date = latest_sector_date.data[0]["date"]
+        sectors_result = conn.table("sector_scores").select("sector, score").eq("date", latest_date).order("score", desc=True).limit(10).execute()
+        context["top_sectors"] = [(s["sector"], s["score"]) for s in sectors_result.data] if sectors_result.data else []
+    else:
+        context["top_sectors"] = []
+
+    # Get screener results
+    latest_screener_date = conn.table("screener_results").select("date").order("date", desc=True).limit(1).execute()
+    if latest_screener_date.data:
+        latest_date = latest_screener_date.data[0]["date"]
+        screener_result = conn.table("screener_results").select("*").eq("date", latest_date).order("composite_score", desc=True).limit(30).execute()
+        context["screener_results"] = screener_result.data if screener_result.data else []
+    else:
+        context["screener_results"] = []
+
+    return context
+
+
+def _build_allocation_prompt(agent, context):
+    """Build the prompt for OpenAI allocation"""
+    agent_name = agent["name"]
+    risk_profile = agent["risk_profile"]
+    regime = context["regime"]
+    regime_details = context["regime_details"]
+    top_sectors = context["top_sectors"]
+    screener_results = context["screener_results"]
+
+    # Format sectors
+    sectors_text = "\n".join([f"  {i+1}. {sector} (score: {score:.2f})" for i, (sector, score) in enumerate(top_sectors[:5])])
+
+    # Format screener results
+    screener_text = "\n".join([
+        f"  {i+1}. {stock['ticker']} - Score: {stock['composite_score']:.2f} (Quality: {stock.get('quality_score', 0):.1f}, Value: {stock.get('value_score', 0):.1f}, Momentum: {stock.get('momentum_score', 0):.1f})"
+        for i, stock in enumerate(screener_results[:20])
+    ])
+
+    prompt = f"""You are managing a {risk_profile} risk profile portfolio called "{agent_name}".
+
+**Current Market Regime: {regime}**
+- Growth Z-Score: {regime_details.get('growth_z', 'N/A')}
+- Inflation Z-Score: {regime_details.get('inflation_z', 'N/A')}
+- Liquidity Z-Score: {regime_details.get('liquidity_z', 'N/A')}
+- Rates Z-Score: {regime_details.get('rates_z', 'N/A')}
+
+**Top Performing Sectors:**
+{sectors_text if sectors_text else "  (No sector data available)"}
+
+**Stock Screener Results (Top 20):**
+{screener_text if screener_text else "  (No screener results available)"}
+
+**Your Task:**
+Construct a portfolio allocation with 8-12 stock positions that aligns with the {risk_profile} risk profile.
+
+**Requirements:**
+1. Total portfolio weight should be 100%
+2. Include CASH as a position (minimum 5% for Aggressive, 15% for Balanced, 30% for Defensive)
+3. Consider the macro regime and favor sectors/stocks that perform well in current conditions
+4. For each position, provide clear reasoning
+
+**Output Format:**
+Return a JSON object with this structure:
+{{
+  "AAPL": {{
+    "weight": 12.5,
+    "reason": "Strong momentum in technology sector, high quality fundamentals, performs well in Goldilocks regime"
+  }},
+  "CASH": {{
+    "weight": 5.0,
+    "reason": "Minimum buffer for rebalancing opportunities"
+  }}
+}}
+
+Make sure weights add up to 100%. Focus on transparency - explain WHY you chose each stock and WHY that weight."""
+
+    return prompt
+
+
+def _parse_ai_allocation(ai_response, agent_name):
+    """Parse AI response to extract weights"""
+    try:
+        # Try to find JSON in the response
+        import re
+        json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', ai_response, re.DOTALL)
+        if json_match:
+            weights_json = json.loads(json_match.group())
+            return weights_json
+        else:
+            logger.warning(f"    No JSON found in AI response")
+            return None
+    except Exception as e:
+        logger.error(f"    Failed to parse AI response: {e}")
+        return None
+
+
+def _get_fallback_weights(agent_name):
+    """Fallback weights when AI parsing fails"""
+    if agent_name == "Aggressive":
+        return {
+            "AAPL": {"weight": 12.5, "reason": "Fallback allocation"},
+            "MSFT": {"weight": 11.8, "reason": "Fallback allocation"},
+            "NVDA": {"weight": 10.2, "reason": "Fallback allocation"},
+            "GOOGL": {"weight": 8.5, "reason": "Fallback allocation"},
+            "CASH": {"weight": 5.0, "reason": "Buffer"}
+        }
+    elif agent_name == "Balanced":
+        return {
+            "AAPL": {"weight": 8.5, "reason": "Fallback allocation"},
+            "MSFT": {"weight": 8.2, "reason": "Fallback allocation"},
+            "JNJ": {"weight": 6.5, "reason": "Fallback allocation"},
+            "CASH": {"weight": 15.0, "reason": "Buffer"}
+        }
+    else:  # Defensive
+        return {
+            "JNJ": {"weight": 10.5, "reason": "Fallback allocation"},
+            "PG": {"weight": 9.8, "reason": "Fallback allocation"},
+            "KO": {"weight": 7.5, "reason": "Fallback allocation"},
+            "CASH": {"weight": 35.0, "reason": "Capital preservation"}
+        }
+
+
+def _run_fallback_allocation(conn, config, today):
+    """Fallback to rule-based allocation when OpenAI is not available"""
+    logger.info("  Using rule-based fallback allocation...")
 
     # Get AI agents
     agents_result = conn.table("ai_agents").select("id, name, risk_profile").order("id").execute()
     agents = [(a["id"], a["name"], a["risk_profile"]) for a in agents_result.data] if agents_result.data else []
 
-    # Get latest regime
+    # Get context for logging
     regime_result = conn.table("macro_regime_daily").select("regime").order("date", desc=True).limit(1).execute()
-    regime = regime_result.data[0]["regime"] if regime_result.data else "Goldilocks"
-
-    # Get top sector scores
-    # First get the latest date
-    latest_date_result = conn.table("sector_scores").select("date").order("date", desc=True).limit(1).execute()
-    if latest_date_result.data:
-        latest_date = latest_date_result.data[0]["date"]
-        top_sectors_result = conn.table("sector_scores").select("sector, score").eq("date", latest_date).order("score", desc=True).limit(5).execute()
-        top_sectors = [(s["sector"], s["score"]) for s in top_sectors_result.data] if top_sectors_result.data else []
-    else:
-        top_sectors = []
-
-    logger.info(f"  Regime: {regime}, Top sectors: {[s[0] for s in top_sectors]}")
+    regime = regime_result.data[0]["regime"] if regime_result.data else "Unknown"
 
     for agent_id, agent_name, risk_profile in agents:
-        logger.info(f"  Processing agent: {agent_name}")
+        weights = _get_fallback_weights(agent_name)
 
-        # Simplified allocation based on risk profile
-        if agent_name == "Aggressive":
-            weights = {
-                "AAPL": {"weight": 12.5, "reason": {"momentum": "strong", "quality": "high"}},
-                "MSFT": {"weight": 11.8, "reason": {"momentum": "strong", "quality": "high"}},
-                "NVDA": {"weight": 10.2, "reason": {"momentum": "very strong", "sector": "tech"}},
-                "GOOGL": {"weight": 8.5, "reason": {"quality": "high", "sector": "tech"}},
-                "CASH": {"weight": 5.0, "reason": {"minimum_buffer": True}}
-            }
-            perf = {"nav": 1.324, "cash_weight": 5.0, "pnl_daily": 0.015,
-                   "sharpe": 1.85, "mdd": -0.182, "benchmark_return": 0.15}
-        elif agent_name == "Balanced":
-            weights = {
-                "AAPL": {"weight": 8.5, "reason": {"balanced": True, "quality": "high"}},
-                "MSFT": {"weight": 8.2, "reason": {"balanced": True, "quality": "high"}},
-                "JNJ": {"weight": 6.5, "reason": {"quality": "high", "defensive": True}},
-                "PG": {"weight": 5.5, "reason": {"defensive": True, "stable": True}},
-                "CASH": {"weight": 15.0, "reason": {"buffer": True}}
-            }
-            perf = {"nav": 1.185, "cash_weight": 15.0, "pnl_daily": 0.008,
-                   "sharpe": 1.42, "mdd": -0.128, "benchmark_return": 0.15}
-        else:  # Defensive
-            weights = {
-                "JNJ": {"weight": 10.5, "reason": {"quality": "high", "defensive": True}},
-                "PG": {"weight": 9.8, "reason": {"stable": True, "dividend": True}},
-                "KO": {"weight": 7.5, "reason": {"defensive": True, "quality": "high"}},
-                "CASH": {"weight": 35.0, "reason": {"capital_preservation": True}}
-            }
-            perf = {"nav": 1.095, "cash_weight": 35.0, "pnl_daily": 0.004,
-                   "sharpe": 1.15, "mdd": -0.072, "benchmark_return": 0.15}
+        total_weight = sum(w["weight"] for w in weights.values())
+        cash_weight = weights.get("CASH", {}).get("weight", 0)
 
-        # Store weights and performance
+        perf = {
+            "nav": 1.0,
+            "cash_weight": cash_weight,
+            "pnl_daily": 0.0,
+            "sharpe": 0.0,
+            "mdd": 0.0,
+            "benchmark_return": 0.0
+        }
+
         db.upsert_ai_weights(conn, today, agent_id, weights)
         db.upsert_ai_performance(conn, today, agent_id, perf)
 
-        # Store decision log
         db.upsert_decision_log(conn, today, "allocation", agent_name, {
-            "input_ref": {
-                "regime": regime,
-                "top_sectors": [s[0] for s in top_sectors],
-                "sector_scores_available": len(top_sectors) > 0
-            },
-            "computed_ref": {
-                "total_weight": sum(w["weight"] for w in weights.values()),
-                "risk_profile": risk_profile
-            },
+            "input_ref": {"regime": regime},
+            "computed_ref": {"total_weight": total_weight, "risk_profile": risk_profile, "model": "rule-based-fallback"},
             "decision": weights,
-            "rationale_md": f"Allocated {agent_name} portfolio based on {risk_profile} risk profile in {regime} regime"
+            "rationale_md": "Fallback rule-based allocation (OpenAI not available)"
         })
 
-        logger.info(f"    ✓ Allocated {len(weights)} positions")
+        logger.info(f"    ✓ {agent_name}: {len(weights)} positions (Total: {total_weight:.1f}%)")
 
 
 def test_connections():
