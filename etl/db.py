@@ -18,8 +18,15 @@ def get_supabase() -> Client:
     global _supabase_client
 
     if _supabase_client is None:
+        # Reload .env to ensure we have latest values
+        load_dotenv(override=True)
+
         supabase_url = os.getenv("NEXT_PUBLIC_SUPABASE_URL") or os.getenv("SUPABASE_URL")
         supabase_key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_KEY")
+
+        # Debug logging
+        logger.debug(f"SUPABASE_URL: {supabase_url[:30]}..." if supabase_url else "None")
+        logger.debug(f"SUPABASE_KEY length: {len(supabase_key) if supabase_key else 0}")
 
         if not supabase_url or not supabase_key:
             raise ValueError(
