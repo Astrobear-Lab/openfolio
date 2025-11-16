@@ -5,7 +5,7 @@ Fetches macroeconomic time series data from FRED API
 import os
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from fredapi import Fred
 
 from collectors.base_collector import BaseCollector
@@ -60,22 +60,33 @@ class FREDCollector(BaseCollector):
         Returns:
             List of data points in format compatible with db.upsert_macro_points()
         """
-        # Set default date range
+        # Set default date range and normalize to datetime
         if end_date is None:
             end_date = datetime.now()
+        elif isinstance(end_date, date) and not isinstance(end_date, datetime):
+            end_date = datetime.combine(end_date, datetime.max.time())
+        
         if start_date is None:
             start_date = end_date - timedelta(days=365 * 3)  # 3 years
+        elif isinstance(start_date, date) and not isinstance(start_date, datetime):
+            start_date = datetime.combine(start_date, datetime.min.time())
 
-        cache_key = f"fred_{series_code}_{start_date.date()}_{end_date.date()}"
+        # Ensure dates are date objects for cache key
+        start_date_key = start_date.date() if hasattr(start_date, 'date') else start_date
+        end_date_key = end_date.date() if hasattr(end_date, 'date') else end_date
+        cache_key = f"fred_{series_code}_{start_date_key}_{end_date_key}"
 
         def fetch_from_api():
             """Fetch from FRED API."""
             if not self.fred_client:
                 raise ValueError("FRED client not initialized")
 
-            logger.info(f"Fetching FRED series {series_code} from {start_date.date()} to {end_date.date()}")
+            # Convert to date for logging
+            start_log = start_date.date() if hasattr(start_date, 'date') else start_date
+            end_log = end_date.date() if hasattr(end_date, 'date') else end_date
+            logger.info(f"Fetching FRED series {series_code} from {start_log} to {end_log}")
 
-            # Fetch series using fredapi
+            # Fetch series using fredapi (start_date and end_date are now guaranteed to be datetime)
             series = self.fred_client.get_series(
                 series_code,
                 observation_start=start_date.strftime("%Y-%m-%d"),
@@ -104,8 +115,8 @@ class FREDCollector(BaseCollector):
             self.log_collection_stats(
                 "macro_points",
                 len(points),
-                start_date=str(start_date.date()),
-                end_date=str(end_date.date()),
+                start_date=str(start_date_key),
+                end_date=str(end_date_key),
             )
 
             return points
@@ -113,7 +124,17 @@ class FREDCollector(BaseCollector):
         def fallback_to_seed():
             """Generate seed data as fallback."""
             logger.warning(f"Using seed data for FRED series {series_code}")
-            return generate_macro_points(series_code, days=(end_date - start_date).days)
+            # Calculate days difference safely
+            if isinstance(end_date, datetime) and isinstance(start_date, datetime):
+                days_diff = (end_date - start_date).days
+            elif isinstance(end_date, date) and isinstance(start_date, date):
+                days_diff = (end_date - start_date).days
+            else:
+                # Mixed types - convert to date
+                end_d = end_date.date() if hasattr(end_date, 'date') else end_date
+                start_d = start_date.date() if hasattr(start_date, 'date') else start_date
+                days_diff = (end_d - start_d).days
+            return generate_macro_points(series_code, days=days_diff)
 
         # Try to get from cache or fetch
         return self.get_from_cache_or_fetch(

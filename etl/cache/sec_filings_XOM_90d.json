@@ -1,0 +1,61 @@
+{
+  "data": [
+    {
+      "ticker": "XOM",
+      "dt": "2025-11-13 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000034088&accession_number=0001193125-25-279379&xbrl_type=v",
+      "title": "XOM 8-K Filing - 2025-11-13",
+      "body": "SEC 8-K filing for XOM. CIK: 0000034088, Accession: 0001193125-25-279379",
+      "accession_number": "0001193125-25-279379",
+      "primary_document": "d82416d8k.htm"
+    },
+    {
+      "ticker": "XOM",
+      "dt": "2025-11-03 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000034088&accession_number=0000034088-25-000063&xbrl_type=v",
+      "title": "XOM 8-K Filing - 2025-11-03",
+      "body": "SEC 8-K filing for XOM. CIK: 0000034088, Accession: 0000034088-25-000063",
+      "accession_number": "0000034088-25-000063",
+      "primary_document": "xom-20251028.htm"
+    },
+    {
+      "ticker": "XOM",
+      "dt": "2025-11-03 00:00:00",
+      "type": "10-Q",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000034088&accession_number=0000034088-25-000061&xbrl_type=v",
+      "title": "XOM 10-Q Filing - 2025-11-03",
+      "body": "SEC 10-Q filing for XOM. CIK: 0000034088, Accession: 0000034088-25-000061",
+      "accession_number": "0000034088-25-000061",
+      "primary_document": "xom-20250930.htm"
+    },
+    {
+      "ticker": "XOM",
+      "dt": "2025-10-31 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000034088&accession_number=0000034088-25-000059&xbrl_type=v",
+      "title": "XOM 8-K Filing - 2025-10-31",
+      "body": "SEC 8-K filing for XOM. CIK: 0000034088, Accession: 0000034088-25-000059",
+      "accession_number": "0000034088-25-000059",
+      "primary_document": "xom-20251031.htm"
+    },
+    {
+      "ticker": "XOM",
+      "dt": "2025-10-06 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000034088&accession_number=0000034088-25-000055&xbrl_type=v",
+      "title": "XOM 8-K Filing - 2025-10-06",
+      "body": "SEC 8-K filing for XOM. CIK: 0000034088, Accession: 0000034088-25-000055",
+      "accession_number": "0000034088-25-000055",
+      "primary_document": "xom-20251006.htm"
+    }
+  ],
+  "cached_at": 1763222752.418926,
+  "cached_at_iso": "2025-11-15T11:05:52.418926",
+  "key": "sec_filings_XOM_90d",
+  "metadata": {
+    "source": "SEC EDGAR",
+    "fetched_at": "2025-11-15T11:05:52.418905"
+  }
+}

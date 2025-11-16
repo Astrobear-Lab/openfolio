@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS macro_points (
   revision_of DATE,
   raw_json JSONB,
   url TEXT,
-  PRIMARY KEY(series_id, ts, COALESCE(revision_of, ts))
+  CONSTRAINT macro_points_unique UNIQUE (series_id, ts, revision_of)
 );
 
 -- ============================================================
@@ -86,7 +86,8 @@ CREATE TABLE IF NOT EXISTS event_docs (
   type TEXT,
   url TEXT,
   title TEXT,
-  body TEXT
+  body TEXT,
+  CONSTRAINT event_docs_unique UNIQUE (ticker, dt, type)
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_ticker ON event_docs(ticker);
@@ -202,3 +203,34 @@ CREATE TABLE IF NOT EXISTS decision_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_decision_date ON decision_logs(date);
+
+-- ============================================================
+-- ADD UNIQUE CONSTRAINTS TO EXISTING TABLES
+-- (Run these after initial schema creation if tables already exist)
+-- ============================================================
+
+-- Add unique constraint to macro_points table
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'macro_points_unique'
+        AND conrelid = 'macro_points'::regclass
+    ) THEN
+        ALTER TABLE macro_points
+        ADD CONSTRAINT macro_points_unique UNIQUE (series_id, ts, revision_of);
+    END IF;
+END $$;
+
+-- Add unique constraint to event_docs table
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'event_docs_unique'
+        AND conrelid = 'event_docs'::regclass
+    ) THEN
+        ALTER TABLE event_docs
+        ADD CONSTRAINT event_docs_unique UNIQUE (ticker, dt, type);
+    END IF;
+END $$;

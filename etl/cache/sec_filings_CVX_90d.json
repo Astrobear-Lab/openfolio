@@ -1,0 +1,51 @@
+{
+  "data": [
+    {
+      "ticker": "CVX",
+      "dt": "2025-11-06 00:00:00",
+      "type": "10-Q",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000093410&accession_number=0000093410-25-000108&xbrl_type=v",
+      "title": "CVX 10-Q Filing - 2025-11-06",
+      "body": "SEC 10-Q filing for CVX. CIK: 0000093410, Accession: 0000093410-25-000108",
+      "accession_number": "0000093410-25-000108",
+      "primary_document": "cvx-20250930.htm"
+    },
+    {
+      "ticker": "CVX",
+      "dt": "2025-11-03 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000093410&accession_number=0000093410-25-000105&xbrl_type=v",
+      "title": "CVX 8-K Filing - 2025-11-03",
+      "body": "SEC 8-K filing for CVX. CIK: 0000093410, Accession: 0000093410-25-000105",
+      "accession_number": "0000093410-25-000105",
+      "primary_document": "cvx-20251029.htm"
+    },
+    {
+      "ticker": "CVX",
+      "dt": "2025-10-31 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000093410&accession_number=0000093410-25-000103&xbrl_type=v",
+      "title": "CVX 8-K Filing - 2025-10-31",
+      "body": "SEC 8-K filing for CVX. CIK: 0000093410, Accession: 0000093410-25-000103",
+      "accession_number": "0000093410-25-000103",
+      "primary_document": "cvx-20251031.htm"
+    },
+    {
+      "ticker": "CVX",
+      "dt": "2025-09-25 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000093410&accession_number=0000093410-25-000098&xbrl_type=v",
+      "title": "CVX 8-K Filing - 2025-09-25",
+      "body": "SEC 8-K filing for CVX. CIK: 0000093410, Accession: 0000093410-25-000098",
+      "accession_number": "0000093410-25-000098",
+      "primary_document": "cvx-20250925.htm"
+    }
+  ],
+  "cached_at": 1763222752.875846,
+  "cached_at_iso": "2025-11-15T11:05:52.875846",
+  "key": "sec_filings_CVX_90d",
+  "metadata": {
+    "source": "SEC EDGAR",
+    "fetched_at": "2025-11-15T11:05:52.875828"
+  }
+}

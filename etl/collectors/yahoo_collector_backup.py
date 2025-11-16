@@ -135,31 +135,41 @@ class YahooCollector(BaseCollector):
         Returns:
             List of price data in format compatible with db.upsert_prices()
         """
-        print(f"DEBUG: fetch_ticker_history called with {ticker}")
-        # Set default date range and normalize to datetime
-        if end_date is None:
-            end_date = datetime.now()
-        elif isinstance(end_date, date) and not isinstance(end_date, datetime):
-            end_date = datetime.combine(end_date, datetime.max.time())
+        print(f"DEBUG: fetch_ticker_history called with ticker={ticker}, start={start_date}, end={end_date}")
+        try:
+            # Set default date range and normalize to datetime
+            print("DEBUG: Setting default date range")
+            if end_date is None:
+                end_date = datetime.now()
+            elif isinstance(end_date, date) and not isinstance(end_date, datetime):
+                end_date = datetime.combine(end_date, datetime.max.time())
 
-        if start_date is None:
-            start_date = end_date - timedelta(days=365 * 2)  # 2 years
-        elif isinstance(start_date, date) and not isinstance(start_date, datetime):
-            start_date = datetime.combine(start_date, datetime.min.time())
+            print(f"DEBUG: end_date set to {end_date}")
+            if start_date is None:
+                start_date = end_date - timedelta(days=365 * 2)  # 2 years
+            elif isinstance(start_date, date) and not isinstance(start_date, datetime):
+                start_date = datetime.combine(start_date, datetime.min.time())
 
-        # Ensure dates are date objects for cache key
-        print("DEBUG: Creating cache key")
-        start_date_key = start_date.date() if hasattr(start_date, "date") else start_date
-        end_date_key = end_date.date() if hasattr(end_date, "date") else end_date
-        cache_key = f"yahoo_{ticker}_{start_date_key}_{end_date_key}"
-        print(f"DEBUG: Cache key: {cache_key}")
+            print(f"DEBUG: start_date set to {start_date}")
+            # Ensure dates are date objects for cache key
+            print("DEBUG: Creating cache key")
+            start_date_key = start_date.date() if hasattr(start_date, "date") else start_date
+            end_date_key = end_date.date() if hasattr(end_date, "date") else end_date
+            cache_key = f"yahoo_{ticker}_{start_date_key}_{end_date_key}"
+            print(f"DEBUG: Cache key created: {cache_key}")
+        except Exception as e:
+            print(f"DEBUG: Exception in date processing: {e}")
+            raise
 
+        print("DEBUG: Defining fetch_from_api function")
         def fetch_from_api():
             """Fetch from Yahoo Finance using direct API calls."""
+            print("DEBUG: Inside fetch_from_api")
             # Convert to date for logging
             start_log = start_date.date() if hasattr(start_date, "date") else start_date
             end_log = end_date.date() if hasattr(end_date, "date") else end_date
             logger.info(f"Fetching Yahoo data for {ticker} from {start_log} to {end_log}")
+            print(f"DEBUG: About to call _with_backoff")
 
             # NEW: 직접 API 호출로 변경
             def _do_direct_api():
@@ -268,27 +278,27 @@ class YahooCollector(BaseCollector):
             logger.error(f"Failed to fetch {ticker} directly: {e}")
             return []
 
+        print("DEBUG: Defining fallback_to_seed function")
         def fallback_to_seed():
             """Generate seed data as fallback."""
+            print("DEBUG: Inside fallback_to_seed")
             logger.warning(f"Using seed data for {ticker}")
             return generate_prices(ticker, days=(end_date - start_date).days)
 
+        print("DEBUG: About to call get_from_cache_or_fetch")
         # Try to get from cache or fetch
-        def do_fetch():
-            try:
-                return fetch_from_api()
-            except Exception as e:
-                logger.warning(f"Failed to fetch {ticker} from API: {e}, using seed data")
-                return fallback_to_seed()
-
-        # Debug
-        print(f"DEBUG: About to call do_fetch")
-        fetch_result = do_fetch()
-        print(f"DEBUG: do_fetch returned: {type(fetch_result)}")
-        if fetch_result:
-            print(f"DEBUG: fetch_result length: {len(fetch_result)}")
-
-        return fetch_result  # 직접 반환해서 get_from_cache_or_fetch 생략
+        print(f"DEBUG: About to call get_from_cache_or_fetch with key={cache_key}")
+        result = self.get_from_cache_or_fetch(
+            cache_key=cache_key,
+            fetch_fn=lambda: self.fetch_with_fallback(
+                fetch_fn=fetch_from_api,
+                fallback_fn=fallback_to_seed,
+                api_key_name=None,  # Yahoo doesn't require API key
+            ),
+            max_age_seconds=86400,  # Cache for 1 day
+        )
+        print(f"DEBUG: get_from_cache_or_fetch returned {type(result)}")
+        return result
 
     def fetch_all_tickers(
         self,

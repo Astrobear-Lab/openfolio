@@ -1,0 +1,623 @@
+{
+  "data": [
+    {
+      "date": "2022-11-01",
+      "value": 3.6,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301272",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2022-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.6
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2022-12-01",
+      "value": 3.5,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301283",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2022-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.5
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-01-01",
+      "value": 3.5,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301288",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.5
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-02-01",
+      "value": 3.6,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301291",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.6
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-03-01",
+      "value": 3.5,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301294",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.5
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-04-01",
+      "value": 3.4,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301297",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.4
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-05-01",
+      "value": 3.6,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301300",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.6
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-06-01",
+      "value": 3.6,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301304",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.6
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-07-01",
+      "value": 3.5,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301307",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.5
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-08-01",
+      "value": 3.7,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301310",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.7
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-09-01",
+      "value": 3.8,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301312",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-09-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.8
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-10-01",
+      "value": 3.9,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301315",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-10-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.9
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-11-01",
+      "value": 3.7,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301318",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.7
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2023-12-01",
+      "value": 3.8,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301321",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2023-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.8
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-01-01",
+      "value": 3.7,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301324",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.7
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-02-01",
+      "value": 3.9,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301327",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.9
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-03-01",
+      "value": 3.9,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301330",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.9
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-04-01",
+      "value": 3.9,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301333",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 3.9
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-05-01",
+      "value": 4.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301337",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-06-01",
+      "value": 4.1,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301340",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.1
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-07-01",
+      "value": 4.2,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301343",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.2
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-08-01",
+      "value": 4.2,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301347",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.2
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-09-01",
+      "value": 4.1,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301350",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-09-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.1
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-10-01",
+      "value": 4.1,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301353",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-10-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.1
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-11-01",
+      "value": 4.2,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301357",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.2
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2024-12-01",
+      "value": 4.1,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301360",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2024-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.1
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-01-01",
+      "value": 4.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301459",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-02-01",
+      "value": 4.1,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301464",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.1
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-03-01",
+      "value": 4.2,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301468",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.2
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-04-01",
+      "value": 4.2,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301471",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.2
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-05-01",
+      "value": 4.2,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301474",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.2
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-06-01",
+      "value": 4.1,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301477",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.1
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-07-01",
+      "value": 4.2,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301481",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.2
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    },
+    {
+      "date": "2025-08-01",
+      "value": 4.3,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:40.301484",
+        "metadata": {
+          "series_code": "UNRATE",
+          "date": "2025-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/UNRATE"
+        },
+        "response": {
+          "value": 4.3
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/UNRATE"
+    }
+  ],
+  "cached_at": 1763222740.301576,
+  "cached_at_iso": "2025-11-15T11:05:40.301577",
+  "key": "fred_UNRATE_2022-11-16_2025-11-15",
+  "metadata": {
+    "source": "FRED",
+    "fetched_at": "2025-11-15T11:05:40.301559"
+  }
+}

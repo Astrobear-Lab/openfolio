@@ -1,0 +1,81 @@
+{
+  "data": [
+    {
+      "ticker": "PG",
+      "dt": "2025-11-04 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000080424&accession_number=0001193125-25-264728&xbrl_type=v",
+      "title": "PG 8-K Filing - 2025-11-04",
+      "body": "SEC 8-K filing for PG. CIK: 0000080424, Accession: 0001193125-25-264728",
+      "accession_number": "0001193125-25-264728",
+      "primary_document": "d47629d8k.htm"
+    },
+    {
+      "ticker": "PG",
+      "dt": "2025-11-03 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000080424&accession_number=0001193125-25-262609&xbrl_type=v",
+      "title": "PG 8-K Filing - 2025-11-03",
+      "body": "SEC 8-K filing for PG. CIK: 0000080424, Accession: 0001193125-25-262609",
+      "accession_number": "0001193125-25-262609",
+      "primary_document": "d35820d8k.htm"
+    },
+    {
+      "ticker": "PG",
+      "dt": "2025-10-24 00:00:00",
+      "type": "10-Q",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000080424&accession_number=0000080424-25-000245&xbrl_type=v",
+      "title": "PG 10-Q Filing - 2025-10-24",
+      "body": "SEC 10-Q filing for PG. CIK: 0000080424, Accession: 0000080424-25-000245",
+      "accession_number": "0000080424-25-000245",
+      "primary_document": "pg-20250930.htm"
+    },
+    {
+      "ticker": "PG",
+      "dt": "2025-10-24 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000080424&accession_number=0000080424-25-000243&xbrl_type=v",
+      "title": "PG 8-K Filing - 2025-10-24",
+      "body": "SEC 8-K filing for PG. CIK: 0000080424, Accession: 0000080424-25-000243",
+      "accession_number": "0000080424-25-000243",
+      "primary_document": "pg-20251024.htm"
+    },
+    {
+      "ticker": "PG",
+      "dt": "2025-10-24 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000080424&accession_number=0000080424-25-000240&xbrl_type=v",
+      "title": "PG 8-K Filing - 2025-10-24",
+      "body": "SEC 8-K filing for PG. CIK: 0000080424, Accession: 0000080424-25-000240",
+      "accession_number": "0000080424-25-000240",
+      "primary_document": "pg-20251024.htm"
+    },
+    {
+      "ticker": "PG",
+      "dt": "2025-10-16 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000080424&accession_number=0000080424-25-000235&xbrl_type=v",
+      "title": "PG 8-K Filing - 2025-10-16",
+      "body": "SEC 8-K filing for PG. CIK: 0000080424, Accession: 0000080424-25-000235",
+      "accession_number": "0000080424-25-000235",
+      "primary_document": "pg-20251016.htm"
+    },
+    {
+      "ticker": "PG",
+      "dt": "2025-10-14 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000080424&accession_number=0000080424-25-000217&xbrl_type=v",
+      "title": "PG 8-K Filing - 2025-10-14",
+      "body": "SEC 8-K filing for PG. CIK: 0000080424, Accession: 0000080424-25-000217",
+      "accession_number": "0000080424-25-000217",
+      "primary_document": "pg-20251014.htm"
+    }
+  ],
+  "cached_at": 1763222750.779747,
+  "cached_at_iso": "2025-11-15T11:05:50.779747",
+  "key": "sec_filings_PG_90d",
+  "metadata": {
+    "source": "SEC EDGAR",
+    "fetched_at": "2025-11-15T11:05:50.779727"
+  }
+}

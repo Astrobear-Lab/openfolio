@@ -1,0 +1,641 @@
+{
+  "data": [
+    {
+      "date": "2022-11-01",
+      "value": 298.708,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187082",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2022-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 298.708
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2022-12-01",
+      "value": 298.808,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187090",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2022-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 298.808
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-01-01",
+      "value": 300.456,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187093",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 300.456
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-02-01",
+      "value": 301.476,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187096",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 301.476
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-03-01",
+      "value": 301.643,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187099",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 301.643
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-04-01",
+      "value": 302.858,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187101",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 302.858
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-05-01",
+      "value": 303.316,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187104",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 303.316
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-06-01",
+      "value": 304.099,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187107",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 304.099
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-07-01",
+      "value": 304.615,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187110",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 304.615
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-08-01",
+      "value": 306.138,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187112",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 306.138
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-09-01",
+      "value": 307.374,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187115",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-09-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 307.374
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-10-01",
+      "value": 307.653,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187117",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-10-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 307.653
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-11-01",
+      "value": 308.087,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187120",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 308.087
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2023-12-01",
+      "value": 308.735,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187123",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2023-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 308.735
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-01-01",
+      "value": 309.794,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187126",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 309.794
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-02-01",
+      "value": 311.022,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187129",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 311.022
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-03-01",
+      "value": 312.107,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187131",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 312.107
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-04-01",
+      "value": 313.016,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187134",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 313.016
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-05-01",
+      "value": 313.14,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187136",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 313.14
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-06-01",
+      "value": 313.131,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187139",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 313.131
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-07-01",
+      "value": 313.566,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187141",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 313.566
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-08-01",
+      "value": 314.131,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187144",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 314.131
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-09-01",
+      "value": 314.851,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187146",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-09-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 314.851
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-10-01",
+      "value": 315.564,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187149",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-10-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 315.564
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-11-01",
+      "value": 316.449,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187151",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 316.449
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2024-12-01",
+      "value": 317.603,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187154",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2024-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 317.603
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-01-01",
+      "value": 319.086,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187156",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 319.086
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-02-01",
+      "value": 319.775,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187159",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 319.775
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-03-01",
+      "value": 319.615,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187161",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 319.615
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-04-01",
+      "value": 320.321,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187164",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 320.321
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-05-01",
+      "value": 320.58,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187166",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 320.58
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-06-01",
+      "value": 321.5,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187169",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 321.5
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-07-01",
+      "value": 322.132,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187171",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 322.132
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-08-01",
+      "value": 323.364,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187174",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 323.364
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    },
+    {
+      "date": "2025-09-01",
+      "value": 324.368,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:34.187177",
+        "metadata": {
+          "series_code": "CPIAUCSL",
+          "date": "2025-09-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        "response": {
+          "value": 324.368
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+    }
+  ],
+  "cached_at": 1763222734.1872551,
+  "cached_at_iso": "2025-11-15T11:05:34.187255",
+  "key": "fred_CPIAUCSL_2022-11-16_2025-11-15",
+  "metadata": {
+    "source": "FRED",
+    "fetched_at": "2025-11-15T11:05:34.187242"
+  }
+}

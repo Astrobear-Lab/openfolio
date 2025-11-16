@@ -1,0 +1,623 @@
+{
+  "data": [
+    {
+      "date": "2022-11-01",
+      "value": 154210.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243270",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2022-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 154210.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2022-12-01",
+      "value": 154336.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243277",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2022-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 154336.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-01-01",
+      "value": 154780.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243281",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 154780.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-02-01",
+      "value": 155086.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243284",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 155086.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-03-01",
+      "value": 155171.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243287",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 155171.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-04-01",
+      "value": 155387.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243290",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 155387.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-05-01",
+      "value": 155614.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243293",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 155614.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-06-01",
+      "value": 155871.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243295",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 155871.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-07-01",
+      "value": 156019.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243298",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 156019.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-08-01",
+      "value": 156176.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243301",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 156176.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-09-01",
+      "value": 156334.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243303",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-09-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 156334.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-10-01",
+      "value": 156520.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243306",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-10-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 156520.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-11-01",
+      "value": 156661.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243309",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 156661.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2023-12-01",
+      "value": 156930.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243311",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2023-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 156930.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-01-01",
+      "value": 157049.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243314",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 157049.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-02-01",
+      "value": 157271.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243316",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 157271.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-03-01",
+      "value": 157517.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243319",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 157517.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-04-01",
+      "value": 157635.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243322",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 157635.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-05-01",
+      "value": 157828.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243324",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 157828.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-06-01",
+      "value": 157915.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243327",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 157915.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-07-01",
+      "value": 158003.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243329",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 158003.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-08-01",
+      "value": 158074.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243332",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 158074.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-09-01",
+      "value": 158314.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243335",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-09-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 158314.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-10-01",
+      "value": 158358.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243338",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-10-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 158358.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-11-01",
+      "value": 158619.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243340",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-11-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 158619.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2024-12-01",
+      "value": 158942.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243343",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2024-12-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 158942.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-01-01",
+      "value": 159053.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243346",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-01-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159053.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-02-01",
+      "value": 159155.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243349",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-02-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159155.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-03-01",
+      "value": 159275.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243351",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-03-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159275.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-04-01",
+      "value": 159433.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243354",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-04-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159433.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-05-01",
+      "value": 159452.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243356",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-05-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159452.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-06-01",
+      "value": 159439.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243359",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-06-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159439.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-07-01",
+      "value": 159518.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243362",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-07-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159518.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    },
+    {
+      "date": "2025-08-01",
+      "value": 159540.0,
+      "revision_of": null,
+      "raw_json": {
+        "source": "FRED",
+        "fetched_at": "2025-11-15T11:05:39.243364",
+        "metadata": {
+          "series_code": "PAYEMS",
+          "date": "2025-08-01 00:00:00",
+          "url": "https://fred.stlouisfed.org/series/PAYEMS"
+        },
+        "response": {
+          "value": 159540.0
+        }
+      },
+      "url": "https://fred.stlouisfed.org/series/PAYEMS"
+    }
+  ],
+  "cached_at": 1763222739.243447,
+  "cached_at_iso": "2025-11-15T11:05:39.243447",
+  "key": "fred_PAYEMS_2022-11-16_2025-11-15",
+  "metadata": {
+    "source": "FRED",
+    "fetched_at": "2025-11-15T11:05:39.243431"
+  }
+}

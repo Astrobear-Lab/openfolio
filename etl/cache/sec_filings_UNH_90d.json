@@ -1,0 +1,71 @@
+{
+  "data": [
+    {
+      "ticker": "UNH",
+      "dt": "2025-11-13 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000731766&accession_number=0000731766-25-000310&xbrl_type=v",
+      "title": "UNH 8-K Filing - 2025-11-13",
+      "body": "SEC 8-K filing for UNH. CIK: 0000731766, Accession: 0000731766-25-000310",
+      "accession_number": "0000731766-25-000310",
+      "primary_document": "unh-20251106.htm"
+    },
+    {
+      "ticker": "UNH",
+      "dt": "2025-11-07 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000731766&accession_number=0000731766-25-000308&xbrl_type=v",
+      "title": "UNH 8-K Filing - 2025-11-07",
+      "body": "SEC 8-K filing for UNH. CIK: 0000731766, Accession: 0000731766-25-000308",
+      "accession_number": "0000731766-25-000308",
+      "primary_document": "unh-20251107.htm"
+    },
+    {
+      "ticker": "UNH",
+      "dt": "2025-10-28 00:00:00",
+      "type": "10-Q",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000731766&accession_number=0000731766-25-000305&xbrl_type=v",
+      "title": "UNH 10-Q Filing - 2025-10-28",
+      "body": "SEC 10-Q filing for UNH. CIK: 0000731766, Accession: 0000731766-25-000305",
+      "accession_number": "0000731766-25-000305",
+      "primary_document": "unh-20250930.htm"
+    },
+    {
+      "ticker": "UNH",
+      "dt": "2025-10-28 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000731766&accession_number=0000731766-25-000301&xbrl_type=v",
+      "title": "UNH 8-K Filing - 2025-10-28",
+      "body": "SEC 8-K filing for UNH. CIK: 0000731766, Accession: 0000731766-25-000301",
+      "accession_number": "0000731766-25-000301",
+      "primary_document": "unh-20251028.htm"
+    },
+    {
+      "ticker": "UNH",
+      "dt": "2025-09-08 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000731766&accession_number=0000731766-25-000245&xbrl_type=v",
+      "title": "UNH 8-K Filing - 2025-09-08",
+      "body": "SEC 8-K filing for UNH. CIK: 0000731766, Accession: 0000731766-25-000245",
+      "accession_number": "0000731766-25-000245",
+      "primary_document": "unh-20250908.htm"
+    },
+    {
+      "ticker": "UNH",
+      "dt": "2025-08-20 00:00:00",
+      "type": "8-K",
+      "url": "https://www.sec.gov/cgi-bin/viewer?action=view&cik=0000731766&accession_number=0000731766-25-000239&xbrl_type=v",
+      "title": "UNH 8-K Filing - 2025-08-20",
+      "body": "SEC 8-K filing for UNH. CIK: 0000731766, Accession: 0000731766-25-000239",
+      "accession_number": "0000731766-25-000239",
+      "primary_document": "unh-20250820.htm"
+    }
+  ],
+  "cached_at": 1763222751.150399,
+  "cached_at_iso": "2025-11-15T11:05:51.150399",
+  "key": "sec_filings_UNH_90d",
+  "metadata": {
+    "source": "SEC EDGAR",
+    "fetched_at": "2025-11-15T11:05:51.150381"
+  }
+}

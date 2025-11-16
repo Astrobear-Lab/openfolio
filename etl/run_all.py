@@ -49,7 +49,7 @@ def run_macro_etl(conn, config):
     collector = FREDCollector()
 
     # Determine date range (3 years of history)
-    end_date = date.today()
+    end_date = datetime.now()
     start_date = end_date - timedelta(days=365*3)
 
     for series_config in config["macro_series"]:
@@ -101,7 +101,7 @@ def run_prices_etl(conn, config):
     all_tickers = [s["ticker"] for s in config["sector_etfs"]] + config["sample_stocks"]
 
     # Determine date range (2 years for technical indicators)
-    end_date = date.today()
+    end_date = datetime.now()
     start_date = end_date - timedelta(days=365*2)
 
     try:
@@ -245,7 +245,7 @@ def run_features_regime_etl(conn, config):
     calculator = FeatureRegimeCalculator(window_months=36)
 
     # Calculate for recent dates (last 90 days)
-    end_date = date.today()
+    end_date = datetime.now()
     start_date = end_date - timedelta(days=90)
 
     current_date = start_date
@@ -466,6 +466,81 @@ def run_ai_allocation_etl(conn, config):
         logger.info(f"    ✓ Allocated {len(weights)} positions")
 
 
+def test_connections():
+    """Test all external connections before starting ETL"""
+    logger.info("🔍 TESTING EXTERNAL CONNECTIONS")
+
+    # Test environment variables
+    logger.info("  Environment Variables:")
+    logger.info(f"    FRED_API_KEY: {'✓ Set' if os.getenv('FRED_API_KEY') else '✗ Missing'}")
+
+    supabase_url = os.getenv('NEXT_PUBLIC_SUPABASE_URL') or os.getenv('SUPABASE_URL')
+    supabase_key = os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY') or os.getenv('SUPABASE_KEY')
+    logger.info(f"    SUPABASE_URL: {'✓ Set' if supabase_url else '✗ Missing'}")
+    logger.info(f"    SUPABASE_KEY: {'✓ Set' if supabase_key else '✗ Missing'}")
+
+    # Log actual URLs (without exposing full keys)
+    if supabase_url:
+        logger.info(f"    Supabase URL: {supabase_url[:30]}...")
+
+    # Test database connection (lighter test)
+    try:
+        logger.info("  Testing Database Connection...")
+        conn = db.get_connection()
+        # Just test client creation and basic connectivity, not actual query
+        logger.info("    ✓ Database client initialized successfully")
+        # Optional: Try a very light query if you want to test full connectivity
+        try:
+            test_result = conn.table("macro_series").select("count").limit(1).execute()
+            logger.info("    ✓ Database query successful")
+        except Exception as query_e:
+            logger.warning(f"    ⚠ Database query failed (but client initialized): {query_e}")
+            logger.info("    → This might be OK if database is empty or network restricted")
+    except Exception as e:
+        logger.error(f"    ✗ Database connection failed: {e}")
+        logger.error("    → Check your Supabase URL and network connectivity")
+        return False
+
+    # Test FRED API connection
+    try:
+        logger.info("  Testing FRED API Connection...")
+        fred_collector = FREDCollector()
+        # Quick test with a small, reliable series
+        test_data = fred_collector.fetch_series("DGS10", start_date=date.today() - timedelta(days=7))
+        if test_data:
+            logger.info("    ✓ FRED API connection successful")
+        else:
+            logger.warning("    ⚠ FRED API returned no data (might be API limits)")
+    except Exception as e:
+        logger.error(f"    ✗ FRED API connection failed: {e}")
+
+    # Test Yahoo Finance connection
+    try:
+        logger.info("  Testing Yahoo Finance Connection...")
+        yahoo_collector = YahooCollector()
+        # Quick test with a reliable ticker
+        test_prices = yahoo_collector.fetch_bulk(["AAPL"], start_date=date.today() - timedelta(days=7))
+        if test_prices:
+            logger.info("    ✓ Yahoo Finance connection successful")
+        else:
+            logger.warning("    ⚠ Yahoo Finance returned no data")
+    except Exception as e:
+        logger.error(f"    ✗ Yahoo Finance connection failed: {e}")
+
+    # Test SEC connection
+    try:
+        logger.info("  Testing SEC EDGAR Connection...")
+        sec_collector = SECCollector()
+        # Quick test
+        test_filings = sec_collector.fetch_recent_filings("AAPL", ["8-K"], 7)
+        logger.info(f"    ✓ SEC EDGAR connection successful (found {len(test_filings) if test_filings else 0} recent filings)")
+    except Exception as e:
+        logger.error(f"    ✗ SEC EDGAR connection failed: {e}")
+
+    logger.info("  Connection tests completed")
+    return True
+
+
 def main():
     """
     Main ETL orchestrator
@@ -490,6 +565,15 @@ def main():
 
     # Load configuration
     config = load_config()
+
+    # Test all connections first (skip if requested)
+    if os.getenv("SKIP_CONNECTION_TESTS") != "true":
+        if not test_connections():
+            logger.error("❌ Connection tests failed - aborting ETL pipeline")
+            logger.info("💡 Tip: Set SKIP_CONNECTION_TESTS=true to skip connection tests")
+            sys.exit(1)
+    else:
+        logger.info("🔍 CONNECTION TESTS SKIPPED (SKIP_CONNECTION_TESTS=true)")
 
     # Connect to database
     conn = db.get_connection()
