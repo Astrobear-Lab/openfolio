@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import logging
+import argparse
 from datetime import datetime, date, timedelta
 from dotenv import load_dotenv
 
@@ -32,6 +33,88 @@ def load_config():
     """Load ETL configuration"""
     with open("config.json", "r") as f:
         return json.load(f)
+
+
+def check_phase2_data_availability(conn):
+    """Check data availability for Phase 2 calculations."""
+    logger.info("📊 Checking data availability for Phase 2...")
+
+    try:
+        # Check prices_daily (needed for technical indicators and sector scoring)
+        prices_result = conn.table("prices_daily").select("*", count="exact", head=False).execute()
+        prices_count = getattr(prices_result, 'count', 0)
+        logger.info(f"  💰 Prices data: {prices_count} records")
+
+        # Check macro data (needed for features & regime)
+        macro_series_result = conn.table("macro_series").select("*", count="exact", head=False).execute()
+        macro_series_count = getattr(macro_series_result, 'count', 0)
+        logger.info(f"  📈 Macro series: {macro_series_count} series")
+
+        macro_points_result = conn.table("macro_points").select("*", count="exact", head=False).execute()
+        macro_points_count = getattr(macro_points_result, 'count', 0)
+        logger.info(f"  📊 Macro points: {macro_points_count} data points")
+
+        # Check existing calculations (optional)
+        try:
+            ta_result = conn.table("ta_daily").select("*", count="exact", head=False).execute()
+            ta_count = getattr(ta_result, 'count', 0)
+            logger.info(f"  📈 Technical indicators: {ta_count} records (existing)")
+        except Exception as e:
+            logger.info(f"  📈 Technical indicators: 0 records ({e})")
+
+        try:
+            features_result = conn.table("macro_features_daily").select("*", count="exact", head=False).execute()
+            features_count = getattr(features_result, 'count', 0)
+            logger.info(f"  🧮 Macro features: {features_count} records (existing)")
+        except Exception as e:
+            logger.info(f"  🧮 Macro features: 0 records ({e})")
+
+        try:
+            regime_result = conn.table("macro_regime_daily").select("*", count="exact", head=False).execute()
+            regime_count = getattr(regime_result, 'count', 0)
+            logger.info(f"  🎯 Regime data: {regime_count} records (existing)")
+        except Exception as e:
+            logger.info(f"  🎯 Regime data: 0 records ({e})")
+
+        # Summary
+        if prices_count > 0 and macro_points_count > 0:
+            logger.info("✅ Phase 2 prerequisites met - sufficient data available")
+        else:
+            logger.warning("⚠️ Phase 2 prerequisites not fully met - some calculations may fail")
+            if prices_count == 0:
+                logger.warning("  - Missing: Price data (required for technical indicators)")
+            if macro_points_count == 0:
+                logger.warning("  - Missing: Macro data (required for features & regime)")
+
+    except Exception as e:
+        logger.error(f"❌ Failed to check data availability: {e}")
+
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description='Openfolio ETL Pipeline',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python run_all.py                    # Run all phases
+  python run_all.py --only-phase2      # Run only Phase 2 (calculations)
+  python run_all.py --skip-phase1      # Skip Phase 1, run Phase 2+3
+  python run_all.py --skip-phase3      # Run Phase 1+2, skip Phase 3
+  python run_all.py --skip-connection-tests  # Skip connection tests
+        """
+    )
+
+    parser.add_argument('--only-phase2', action='store_true',
+                       help='Run only Phase 2 (calculations), skip Phase 1 and 3')
+    parser.add_argument('--skip-phase1', action='store_true',
+                       help='Skip Phase 1 (data collection)')
+    parser.add_argument('--skip-phase3', action='store_true',
+                       help='Skip Phase 3 (AI allocation)')
+    parser.add_argument('--skip-connection-tests', action='store_true',
+                       help='Skip external connection tests')
+
+    return parser.parse_args()
 
 
 def run_macro_etl(conn, config):
@@ -558,6 +641,9 @@ def main():
 
     Phase 3: AI Allocation (depends on Phase 2)
     """
+    # Parse command line arguments
+    args = parse_args()
+
     logger.info("=" * 60)
     logger.info("Starting Openfolio ETL Pipeline")
     logger.info(f"Run time: {datetime.now()}")
@@ -567,33 +653,52 @@ def main():
     config = load_config()
 
     # Test all connections first (skip if requested)
-    if os.getenv("SKIP_CONNECTION_TESTS") != "true":
+    skip_tests = args.skip_connection_tests or os.getenv("SKIP_CONNECTION_TESTS") == "true"
+    if not skip_tests:
         if not test_connections():
             logger.error("❌ Connection tests failed - aborting ETL pipeline")
-            logger.info("💡 Tip: Set SKIP_CONNECTION_TESTS=true to skip connection tests")
+            logger.info("💡 Tip: Use --skip-connection-tests to skip connection tests")
             sys.exit(1)
     else:
-        logger.info("🔍 CONNECTION TESTS SKIPPED (SKIP_CONNECTION_TESTS=true)")
+        logger.info("🔍 CONNECTION TESTS SKIPPED (--skip-connection-tests)")
 
     # Connect to database
     conn = db.get_connection()
 
     try:
+        # Determine which phases to run
+        run_phase1 = not args.only_phase2 and not args.skip_phase1
+        run_phase2 = not args.only_phase2 or args.skip_phase1
+        run_phase3 = not args.only_phase2 and not args.skip_phase3
+
         # Phase 1: Data Collection
-        logger.info("\n📥 PHASE 1: DATA COLLECTION")
-        run_macro_etl(conn, config)
-        run_prices_etl(conn, config)
-        run_events_etl(conn, config)
+        if run_phase1:
+            logger.info("\n📥 PHASE 1: DATA COLLECTION")
+            run_macro_etl(conn, config)
+            run_prices_etl(conn, config)
+            run_events_etl(conn, config)
+        else:
+            logger.info("⏭️ PHASE 1 SKIPPED (--skip-phase1 or --only-phase2)")
 
         # Phase 2: Calculations
-        logger.info("\n🧮 PHASE 2: CALCULATIONS")
-        run_technical_indicators_etl(conn, config)
-        run_features_regime_etl(conn, config)
-        run_sector_scoring_etl(conn, config)
+        if run_phase2:
+            logger.info("\n🧮 PHASE 2: CALCULATIONS")
+
+            # Check data availability before starting Phase 2
+            check_phase2_data_availability(conn)
+
+            run_technical_indicators_etl(conn, config)
+            run_features_regime_etl(conn, config)
+            run_sector_scoring_etl(conn, config)
+        else:
+            logger.info("⏭️ PHASE 2 SKIPPED")
 
         # Phase 3: AI Allocation
-        logger.info("\n🤖 PHASE 3: AI ALLOCATION")
-        run_ai_allocation_etl(conn, config)
+        if run_phase3:
+            logger.info("\n🤖 PHASE 3: AI ALLOCATION")
+            run_ai_allocation_etl(conn, config)
+        else:
+            logger.info("⏭️ PHASE 3 SKIPPED (--skip-phase3 or --only-phase2)")
 
         logger.info("\n" + "=" * 60)
         logger.info("✅ ETL Pipeline Completed Successfully")

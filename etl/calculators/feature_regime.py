@@ -59,11 +59,11 @@ class FeatureRegimeCalculator:
 
             series_id = series_response.data[0]["id"]
 
-            # Fetch points
+            # Fetch points (include revision_of for deduplication)
             cutoff_date = (datetime.now() - timedelta(days=days_back)).date()
 
             points_response = conn.table("macro_points") \
-                .select("ts, value") \
+                .select("ts, value, revision_of") \
                 .eq("series_id", series_id) \
                 .gte("ts", cutoff_date.isoformat()) \
                 .order("ts", desc=False) \
@@ -73,9 +73,14 @@ class FeatureRegimeCalculator:
                 logger.warning(f"No data found for {series_code}")
                 return pd.Series()
 
-            # Convert to Series
+            # Convert to DataFrame and handle duplicates
             df = pd.DataFrame(points_response.data)
             df['ts'] = pd.to_datetime(df['ts'])
+
+            # Handle duplicates: keep the most recent revision (NULL revision_of first, then latest revision_of)
+            df = df.sort_values(['ts', 'revision_of'], na_position='first')
+            df = df.drop_duplicates(subset=['ts'], keep='last')  # Keep last (most recent revision)
+
             df = df.set_index('ts')
             series = df['value'].astype(float)
 
