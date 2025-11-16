@@ -198,8 +198,13 @@ def run_prices_etl(conn, config):
 
         # Store prices
         if all_prices:
-            db.upsert_prices(conn, all_prices)
-            logger.info(f"  ✓ Stored {len(all_prices)} total price records")
+            # Flatten the dictionary values (lists of prices) into a single list
+            flattened_prices = []
+            for ticker_prices in all_prices.values():
+                flattened_prices.extend(ticker_prices)
+
+            db.upsert_prices(conn, flattened_prices)
+            logger.info(f"  ✓ Stored {len(flattened_prices)} total price records")
         else:
             logger.warning("  ⚠ No price data received")
 
