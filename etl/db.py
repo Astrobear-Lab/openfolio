@@ -152,7 +152,7 @@ def upsert_sector_scores(conn: Client, date: date, scores: List[Dict[str, Any]])
 
     data = [
         {
-            "date": date.isoformat() if isinstance(date, (datetime, date)) else date,
+            "date": date.isoformat() if hasattr(date, 'isoformat') else str(date),
             "sector": score["sector"],
             "score": score["score"],
             "components_json": score.get("components", {})
@@ -162,6 +162,49 @@ def upsert_sector_scores(conn: Client, date: date, scores: List[Dict[str, Any]])
 
     result = conn.table("sector_scores").upsert(data, on_conflict="date,sector").execute()
     logger.info(f"Upserted {len(data)} sector scores for {date}")
+
+
+def upsert_screening_steps(conn: Client, steps: List[Dict[str, Any]]):
+    """Upsert screening steps"""
+    if not steps:
+        return
+
+    data = [
+        {
+            "date": step["date"].isoformat() if isinstance(step["date"], (datetime, date)) else step["date"],
+            "ticker": step["ticker"],
+            "step": step["step"],
+            "pass": step["pass"],
+            "score": step["score"],
+            "evidence_json": step["evidence_json"]
+        }
+        for step in steps
+    ]
+
+    result = conn.table("screening_steps").upsert(data, on_conflict="date,ticker,step").execute()
+    logger.info(f"Upserted {len(data)} screening steps")
+
+
+def upsert_rankings(conn: Client, rankings: List[Dict[str, Any]]):
+    """Upsert final rankings"""
+    if not rankings:
+        return
+
+    data = [
+        {
+            "date": ranking["date"].isoformat() if isinstance(ranking["date"], (datetime, date)) else ranking["date"],
+            "ticker": ranking["ticker"],
+            "rank": ranking["rank"],
+            "total_score": ranking["total_score"],
+            "decision": ranking["decision"],
+            "stages_passed": ranking["stages_passed"],
+            "details_json": ranking["details_json"]
+        }
+        for ranking in rankings
+    ]
+
+    result = conn.table("rankings").upsert(data, on_conflict="date,ticker").execute()
+    logger.info(f"Upserted {len(data)} rankings")
 
 
 def upsert_ta_indicators(conn: Client, indicators: List[Dict[str, Any]]):

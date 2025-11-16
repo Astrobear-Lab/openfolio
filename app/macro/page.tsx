@@ -23,18 +23,28 @@ interface RegimeData {
 export default function MacroLabPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [regime, setRegime] = useState<RegimeData | null>(null);
+  const [indicators, setIndicators] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchRegime() {
+    async function fetchData() {
       try {
-        const response = await fetch("/api/regime?date=latest");
-        if (!response.ok) {
+        // Fetch regime data
+        const regimeResponse = await fetch("/api/regime?date=latest");
+        if (!regimeResponse.ok) {
           throw new Error("Failed to fetch regime data");
         }
-        const result = await response.json();
-        setRegime(result.data);
+        const regimeResult = await regimeResponse.json();
+        setRegime(regimeResult.data);
+
+        // Fetch indicators data
+        const indicatorsResponse = await fetch("/api/macro-indicators?date=latest");
+        if (!indicatorsResponse.ok) {
+          throw new Error("Failed to fetch indicators data");
+        }
+        const indicatorsResult = await indicatorsResponse.json();
+        setIndicators(indicatorsResult.data?.indicators || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -42,7 +52,7 @@ export default function MacroLabPage() {
       }
     }
 
-    fetchRegime();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -271,54 +281,91 @@ export default function MacroLabPage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="font-mono text-xs">INDPRO</td>
-                <td>Industrial Production</td>
-                <td className="numeric">103.2</td>
-                <td className="numeric text-positive">+1.2</td>
-                <td>
-                  <a
-                    href="https://fred.stlouisfed.org/series/INDPRO"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline text-xs"
-                  >
-                    FRED
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <td className="font-mono text-xs">CPIAUCSL</td>
-                <td>Consumer Price Index</td>
-                <td className="numeric">309.5</td>
-                <td className="numeric">-0.5</td>
-                <td>
-                  <a
-                    href="https://fred.stlouisfed.org/series/CPIAUCSL"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline text-xs"
-                  >
-                    FRED
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <td className="font-mono text-xs">M2SL</td>
-                <td>M2 Money Supply</td>
-                <td className="numeric">$21.1T</td>
-                <td className="numeric text-positive">+0.8</td>
-                <td>
-                  <a
-                    href="https://fred.stlouisfed.org/series/M2SL"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline text-xs"
-                  >
-                    FRED
-                  </a>
-                </td>
-              </tr>
+              {indicators.length > 0 ? (
+                indicators.map((indicator) => (
+                  <tr key={indicator.code}>
+                    <td className="font-mono text-xs">{indicator.code}</td>
+                    <td>{indicator.name}</td>
+                    <td className="numeric">
+                      {indicator.code === "M2SL"
+                        ? `$${Math.round(indicator.value / 1000)}T`
+                        : indicator.code.includes("CPI")
+                        ? indicator.value.toFixed(1)
+                        : indicator.value.toFixed(1)
+                      }
+                    </td>
+                    <td className={`numeric ${
+                      indicator.zScore > 0 ? "text-positive" :
+                      indicator.zScore < 0 ? "text-danger" : "text-text"
+                    }`}>
+                      {indicator.zScore > 0 ? "+" : ""}
+                      {indicator.zScore?.toFixed(1) || "N/A"}
+                    </td>
+                    <td>
+                      <a
+                        href={`https://fred.stlouisfed.org/series/${indicator.code}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline text-xs"
+                      >
+                        {indicator.source}
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                // Fallback mock data when no indicators loaded
+                <>
+                  <tr>
+                    <td className="font-mono text-xs">INDPRO</td>
+                    <td>Industrial Production</td>
+                    <td className="numeric">103.2</td>
+                    <td className="numeric text-positive">+1.2</td>
+                    <td>
+                      <a
+                        href="https://fred.stlouisfed.org/series/INDPRO"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline text-xs"
+                      >
+                        FRED
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="font-mono text-xs">CPIAUCSL</td>
+                    <td>Consumer Price Index</td>
+                    <td className="numeric">309.5</td>
+                    <td className="numeric">-0.5</td>
+                    <td>
+                      <a
+                        href="https://fred.stlouisfed.org/series/CPIAUCSL"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline text-xs"
+                      >
+                        FRED
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="font-mono text-xs">M2SL</td>
+                    <td>M2 Money Supply</td>
+                    <td className="numeric">$21.1T</td>
+                    <td className="numeric text-positive">+0.8</td>
+                    <td>
+                      <a
+                        href="https://fred.stlouisfed.org/series/M2SL"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline text-xs"
+                      >
+                        FRED
+                      </a>
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>

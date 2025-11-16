@@ -18,6 +18,7 @@ from collectors.sec_collector import SECCollector
 from calculators.technical_indicators import TechnicalCalculator
 from calculators.feature_regime import FeatureRegimeCalculator
 from calculators.sector_scoring import SectorScorer
+from calculators.stock_screener import StockScreener
 
 # Setup logging
 logging.basicConfig(
@@ -473,7 +474,88 @@ def run_sector_scoring_etl(conn, config):
 
         current_date += timedelta(days=1)
 
-    logger.info(f"  ✓ Scored sectors for {calculated_count} days")
+        logger.info(f"  ✓ Scored sectors for {calculated_count} days")
+
+
+def run_screener_etl(conn, config):
+    """
+    Phase 2.4: Stock Screener
+
+    Multi-stage screening of individual stocks:
+    - Quality: Fundamental metrics
+    - Value: Valuation metrics
+    - Events: Recent performance, sentiment
+    - Technical: Momentum, RSI, MACD
+    """
+    logger.info("=== Phase 2.4: Stock Screener ===")
+
+    screener = StockScreener()
+
+    # Get latest date with price data
+    try:
+        response = conn.table("prices_daily").select("date").order("date", desc=True).limit(1).execute()
+        if not response.data:
+            logger.warning("No price data available for screening")
+            return
+        latest_date = datetime.fromisoformat(response.data[0]["date"])
+    except Exception as e:
+        logger.error(f"Failed to get latest date: {e}")
+        return
+
+    logger.info(f"Screening stocks for {latest_date.date()}")
+
+    try:
+        # Screen all stocks
+        results = screener.screen_all_stocks(conn, config, latest_date)
+
+        if results:
+            # Store screening steps
+            screening_steps = []
+            rankings = []
+
+            for i, result in enumerate(results):
+                # Store individual screening steps
+                for step_name in ["quality", "value", "events", "technical"]:
+                    step_data = result[step_name]
+                    screening_steps.append({
+                        "date": latest_date.date(),
+                        "ticker": result["ticker"],
+                        "step": step_name,
+                        "pass": step_data["pass"],
+                        "score": step_data["score"],
+                        "evidence_json": {
+                            "metrics": step_data["metrics"],
+                            "evidence": step_data["evidence"]
+                        }
+                    })
+
+                # Store final ranking
+                rankings.append({
+                    "date": latest_date.date(),
+                    "ticker": result["ticker"],
+                    "rank": i + 1,
+                    "total_score": result["total_score"],
+                    "decision": result["decision"],
+                    "stages_passed": result["stages_passed"],
+                    "details_json": {
+                        "quality": result["quality"],
+                        "value": result["value"],
+                        "events": result["events"],
+                        "technical": result["technical"],
+                        "weights": result["weights"]
+                    }
+                })
+
+            # Upsert to database
+            db.upsert_screening_steps(conn, screening_steps)
+            db.upsert_rankings(conn, rankings)
+
+            logger.info(f"  ✓ Screened {len(results)} stocks, stored {len(screening_steps)} steps")
+        else:
+            logger.warning("  ⚠ No screening results generated")
+
+    except Exception as e:
+        logger.error(f"  ✗ Failed to run screener: {e}")
 
 
 def run_ai_allocation_etl(conn, config):
@@ -704,6 +786,7 @@ def main():
             run_technical_indicators_etl(conn, config)
             run_features_regime_etl(conn, config)
             run_sector_scoring_etl(conn, config)
+            run_screener_etl(conn, config)
         else:
             logger.info("⏭️ PHASE 2 SKIPPED")
 
