@@ -327,9 +327,15 @@ def run_features_regime_etl(conn, config):
 
     calculator = FeatureRegimeCalculator(window_months=36)
 
-    # Calculate for recent dates (last 90 days)
+    # 🚀 PERFORMANCE: Preload all macro data once (instead of 810 queries!)
+    calculator.preload_data(conn)
+
+    # Calculate for recent dates (default: 7 days, configurable via env)
+    days_to_calculate = int(os.getenv("ETL_CALCULATION_DAYS", "7"))
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=90)
+    start_date = end_date - timedelta(days=days_to_calculate)
+
+    logger.info(f"Calculating features for last {days_to_calculate} days (set ETL_CALCULATION_DAYS to change)")
 
     current_date = start_date
     calculated_count = 0
@@ -434,9 +440,12 @@ def run_sector_scoring_etl(conn, config):
 
     logger.info(f"  Current regime: {regime}")
 
-    # Calculate scores for recent dates (last 90 days)
+    # 🚀 PERFORMANCE: Calculate for recent dates only (default: 7 days)
+    days_to_calculate = int(os.getenv("ETL_CALCULATION_DAYS", "7"))
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=90)
+    start_date = end_date - timedelta(days=days_to_calculate)
+
+    logger.info(f"Calculating sector scores for last {days_to_calculate} days")
 
     current_date = start_date
     calculated_count = 0

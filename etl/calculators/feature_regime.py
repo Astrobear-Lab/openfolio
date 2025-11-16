@@ -17,6 +17,8 @@ class FeatureRegimeCalculator:
 
     Z-score normalization uses 36-month rolling window.
     Regime classification based on growth and inflation quadrants.
+
+    Performance optimization: Data is cached to avoid repeated DB queries.
     """
 
     def __init__(self, window_months: int = 36):
@@ -28,6 +30,47 @@ class FeatureRegimeCalculator:
         """
         self.window_months = window_months
         self.window_days = window_months * 30  # Approximate
+        self._cache = {}  # Cache for fetched series
+
+    def preload_data(self, conn: Any):
+        """
+        Preload all required macro series into cache.
+
+        This significantly improves performance by fetching data once
+        instead of on every calculation.
+
+        Args:
+            conn: Supabase client
+        """
+        logger.info("📥 Preloading macro data into cache...")
+
+        series_codes = [
+            "INDPRO", "PAYEMS", "UNRATE",  # Growth
+            "CPIAUCSL", "CPILFESL",        # Inflation
+            "M2SL", "WALCL",               # Liquidity
+            "DGS10", "DGS2"                # Rates
+        ]
+
+        for code in series_codes:
+            logger.info(f"  Loading {code}...")
+            self._cache[code] = self.fetch_macro_series(code, conn)
+
+        logger.info(f"✅ Cached {len(self._cache)} series")
+
+    def get_cached_series(self, series_code: str, conn: Any) -> pd.Series:
+        """
+        Get series from cache or fetch if not cached.
+
+        Args:
+            series_code: FRED series code
+            conn: Supabase client
+
+        Returns:
+            Pandas Series
+        """
+        if series_code not in self._cache:
+            self._cache[series_code] = self.fetch_macro_series(series_code, conn)
+        return self._cache[series_code]
 
     def fetch_macro_series(
         self,
@@ -114,7 +157,7 @@ class FeatureRegimeCalculator:
         self,
         conn: Any,
         date: datetime,
-    ) -> Optional[Tuple[float, Dict[str, Any]]]:
+    ) -> Optional[float]:
         """
         Calculate growth composite z-score.
 
@@ -125,13 +168,17 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict) or None if no data
+            Composite z-score or None if no data
         """
         try:
-            # Fetch series
-            indpro = self.fetch_macro_series("INDPRO", conn)
-            payems = self.fetch_macro_series("PAYEMS", conn)
-            unrate = self.fetch_macro_series("UNRATE", conn)
+            # Use cached data
+            indpro = self.get_cached_series("INDPRO", conn)
+            payems = self.get_cached_series("PAYEMS", conn)
+            unrate = self.get_cached_series("UNRATE", conn)
+
+            if indpro.empty or payems.empty or unrate.empty:
+                logger.warning("Missing growth data")
+                return None
 
             # Calculate z-scores
             indpro_z = self.calculate_z_score(indpro, self.window_days)
@@ -147,21 +194,10 @@ class FeatureRegimeCalculator:
 
                 # Average
                 composite = np.nanmean([indpro_val, payems_val, unrate_val])
-
-                details = {
-                    "inputs": {
-                        "INDPRO_z": float(indpro_val) if pd.notna(indpro_val) else None,
-                        "PAYEMS_z": float(payems_val) if pd.notna(payems_val) else None,
-                        "UNRATE_z_inv": float(unrate_val) if pd.notna(unrate_val) else None,
-                    },
-                    "method": "average of z-scores",
-                    "window_months": self.window_months,
-                }
-
-                return float(composite), details
+                return float(composite) if pd.notna(composite) else None
 
             except KeyError:
-                logger.warning(f"No data for {date}")
+                logger.warning(f"No data for {date.date()}")
                 return None
 
         except Exception as e:
@@ -172,7 +208,7 @@ class FeatureRegimeCalculator:
         self,
         conn: Any,
         date: datetime,
-    ) -> Optional[Tuple[float, Dict[str, Any]]]:
+    ) -> Optional[float]:
         """
         Calculate inflation composite z-score.
 
@@ -183,12 +219,16 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict) or None if no data
+            Composite z-score or None if no data
         """
         try:
-            # Fetch series
-            cpi = self.fetch_macro_series("CPIAUCSL", conn)
-            core_cpi = self.fetch_macro_series("CPILFESL", conn)
+            # Use cached data
+            cpi = self.get_cached_series("CPIAUCSL", conn)
+            core_cpi = self.get_cached_series("CPILFESL", conn)
+
+            if cpi.empty or core_cpi.empty:
+                logger.warning("Missing inflation data")
+                return None
 
             # Calculate month-over-month % change
             cpi_pct = cpi.pct_change(periods=30)  # ~1 month
@@ -206,20 +246,10 @@ class FeatureRegimeCalculator:
 
                 # Average
                 composite = np.nanmean([cpi_val, core_val])
-
-                details = {
-                    "inputs": {
-                        "CPI_z": float(cpi_val) if pd.notna(cpi_val) else None,
-                        "CoreCPI_z": float(core_val) if pd.notna(core_val) else None,
-                    },
-                    "method": "average of MoM % change z-scores",
-                    "window_months": self.window_months,
-                }
-
-                return float(composite), details
+                return float(composite) if pd.notna(composite) else None
 
             except KeyError:
-                logger.warning(f"No inflation data for {date}")
+                logger.warning(f"No inflation data for {date.date()}")
                 return None
 
         except Exception as e:
@@ -230,7 +260,7 @@ class FeatureRegimeCalculator:
         self,
         conn: Any,
         date: datetime,
-    ) -> Optional[Tuple[float, Dict[str, Any]]]:
+    ) -> Optional[float]:
         """
         Calculate liquidity composite z-score.
 
@@ -241,12 +271,16 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict) or None if no data
+            Composite z-score or None if no data
         """
         try:
-            # Fetch series
-            m2 = self.fetch_macro_series("M2SL", conn)
-            walcl = self.fetch_macro_series("WALCL", conn)
+            # Use cached data
+            m2 = self.get_cached_series("M2SL", conn)
+            walcl = self.get_cached_series("WALCL", conn)
+
+            if m2.empty or walcl.empty:
+                logger.warning("Missing liquidity data")
+                return None
 
             # Calculate year-over-year growth
             m2_growth = m2.pct_change(periods=252)  # ~1 year
@@ -264,20 +298,10 @@ class FeatureRegimeCalculator:
 
                 # Average
                 composite = np.nanmean([m2_val, walcl_val])
-
-                details = {
-                    "inputs": {
-                        "M2_growth_z": float(m2_val) if pd.notna(m2_val) else None,
-                        "WALCL_growth_z": float(walcl_val) if pd.notna(walcl_val) else None,
-                    },
-                    "method": "average of YoY growth z-scores",
-                    "window_months": self.window_months,
-                }
-
-                return float(composite), details
+                return float(composite) if pd.notna(composite) else None
 
             except KeyError:
-                logger.warning(f"No liquidity data for {date}")
+                logger.warning(f"No liquidity data for {date.date()}")
                 return None
 
         except Exception as e:
@@ -288,7 +312,7 @@ class FeatureRegimeCalculator:
         self,
         conn: Any,
         date: datetime,
-    ) -> Optional[Tuple[float, Dict[str, Any]]]:
+    ) -> Optional[float]:
         """
         Calculate rates composite z-score.
 
@@ -299,12 +323,16 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict) or None if no data
+            Composite z-score or None if no data
         """
         try:
-            # Fetch series
-            dgs10 = self.fetch_macro_series("DGS10", conn)
-            dgs2 = self.fetch_macro_series("DGS2", conn)
+            # Use cached data
+            dgs10 = self.get_cached_series("DGS10", conn)
+            dgs2 = self.get_cached_series("DGS2", conn)
+
+            if dgs10.empty or dgs2.empty:
+                logger.warning("Missing rates data")
+                return None
 
             # Calculate spread
             spread = dgs10 - dgs2
@@ -316,21 +344,10 @@ class FeatureRegimeCalculator:
             try:
                 date_pd = pd.Timestamp(date)
                 spread_val = spread_z.loc[date_pd]
-
-                details = {
-                    "inputs": {
-                        "10Y": float(dgs10.loc[date_pd]) if pd.notna(dgs10.loc[date_pd]) else None,
-                        "2Y": float(dgs2.loc[date_pd]) if pd.notna(dgs2.loc[date_pd]) else None,
-                        "spread": float(spread.loc[date_pd]) if pd.notna(spread.loc[date_pd]) else None,
-                    },
-                    "method": "z-score of 10Y-2Y spread",
-                    "window_months": self.window_months,
-                }
-
-                return float(spread_val), details
+                return float(spread_val) if pd.notna(spread_val) else None
 
             except KeyError:
-                logger.warning(f"No rates data for {date}")
+                logger.warning(f"No rates data for {date.date()}")
                 return None
 
         except Exception as e:
@@ -362,73 +379,3 @@ class FeatureRegimeCalculator:
             return "Stagflation"
         else:
             return "Disinflation"
-
-    def calculate_all_features(
-        self,
-        conn: Any,
-        date: datetime,
-        config: Dict[str, Any],
-    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-        """
-        Calculate all features and regime for a date.
-
-        Args:
-            conn: Supabase client
-            date: Calculation date
-            config: ETL config
-
-        Returns:
-            Tuple of (features_dict, regime_dict)
-        """
-        logger.info(f"Calculating features and regime for {date.date()}")
-
-        # Calculate composites
-        growth_z, growth_details = self.calculate_growth_composite(conn, date)
-        inflation_z, inflation_details = self.calculate_inflation_composite(conn, date)
-        liquidity_z, liquidity_details = self.calculate_liquidity_composite(conn, date)
-        rates_z, rates_details = self.calculate_rates_composite(conn, date)
-
-        # Classify regime
-        regime = self.classify_regime(
-            growth_z,
-            inflation_z,
-            config.get("regime_rules", {}),
-        )
-
-        # Prepare features dict
-        features = {
-            "growth_composite": {
-                "value": growth_z,
-                "details": growth_details,
-            },
-            "inflation_composite": {
-                "value": inflation_z,
-                "details": inflation_details,
-            },
-            "liquidity_composite": {
-                "value": liquidity_z,
-                "details": liquidity_details,
-            },
-            "rates_composite": {
-                "value": rates_z,
-                "details": rates_details,
-            },
-        }
-
-        # Prepare regime dict
-        regime_data = {
-            "growth_z": growth_z,
-            "inflation_z": inflation_z,
-            "liquidity_z": liquidity_z,
-            "rates_z": rates_z,
-            "regime": regime,
-            "details": {
-                "rules": config.get("regime_rules", {}),
-                "calculated_at": datetime.now().isoformat(),
-                "window_months": self.window_months,
-            },
-        }
-
-        logger.info(f"Regime: {regime} (growth: {growth_z:.2f}, inflation: {inflation_z:.2f})")
-
-        return features, regime_data
