@@ -51,3 +51,5 @@ env/
 
 # Prisma
 prisma/migrations/**/migration.sql.backup
+
+etl/cache/

@@ -425,6 +425,13 @@ class YahooCollector(BaseCollector):
 
                         ticker_df = df_dict[ticker]
 
+                        # DEBUG: Check ticker_df structure
+                        print(f"DEBUG: ticker_df type: {type(ticker_df)}")
+                        print(f"DEBUG: ticker_df shape: {ticker_df.shape}")
+                        print(f"DEBUG: ticker_df columns: {ticker_df.columns}")
+                        if hasattr(ticker_df, 'index'):
+                            print(f"DEBUG: ticker_df index: {ticker_df.index[:3]}")
+
                     if ticker_df is None or ticker_df.empty:
                         logger.warning(f"No data for {ticker} in bulk download")
                         days_diff = (end_date - start_date).days
@@ -433,16 +440,34 @@ class YahooCollector(BaseCollector):
 
                     prices: List[Dict[str, Any]] = []
                     for date_val, row in ticker_df.iterrows():
+                        # Handle different row structures based on single vs multi ticker
+                        if len(tickers) == 1:
+                            # Single ticker: MultiIndex with (ticker, field) tuples
+                            open_price = float(row[(ticker, "Open")]) if pd.notna(row[(ticker, "Open")]) else None
+                            high_price = float(row[(ticker, "High")]) if pd.notna(row[(ticker, "High")]) else None
+                            low_price = float(row[(ticker, "Low")]) if pd.notna(row[(ticker, "Low")]) else None
+                            close_price = float(row[(ticker, "Close")]) if pd.notna(row[(ticker, "Close")]) else None
+                            adj_close_price = float(row[(ticker, "Adj Close")]) if pd.notna(row[(ticker, "Adj Close")]) else None
+                            volume_val = int(row[(ticker, "Volume")]) if pd.notna(row[(ticker, "Volume")]) else None
+                        else:
+                            # Multi ticker: Regular Index with field names
+                            open_price = float(row["Open"]) if pd.notna(row["Open"]) else None
+                            high_price = float(row["High"]) if pd.notna(row["High"]) else None
+                            low_price = float(row["Low"]) if pd.notna(row["Low"]) else None
+                            close_price = float(row["Close"]) if pd.notna(row["Close"]) else None
+                            adj_close_price = float(row["Adj Close"]) if pd.notna(row["Adj Close"]) else None
+                            volume_val = int(row["Volume"]) if pd.notna(row["Volume"]) else None
+
                         prices.append(
                             {
                                 "ticker": ticker,
                                 "date": date_val.date() if hasattr(date_val, "date") else date_val,
-                                "open": float(row["Open"]) if pd.notna(row["Open"]) else None,
-                                "high": float(row["High"]) if pd.notna(row["High"]) else None,
-                                "low": float(row["Low"]) if pd.notna(row["Low"]) else None,
-                                "close": float(row["Close"]) if pd.notna(row["Close"]) else None,
-                                "adj_close": float(row["Adj Close"]) if ("Adj Close" in row and pd.notna(row["Adj Close"])) else None,
-                                "volume": int(row["Volume"]) if pd.notna(row["Volume"]) else None,
+                                "open": open_price,
+                                "high": high_price,
+                                "low": low_price,
+                                "close": close_price,
+                                "adj_close": adj_close_price,
+                                "volume": volume_val,
                                 "source": "yfinance_bulk",
                                 "raw_json": {},  # 필요하면 store_raw_response 사용 가능
                             }

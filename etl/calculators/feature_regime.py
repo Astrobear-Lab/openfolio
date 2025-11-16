@@ -114,7 +114,7 @@ class FeatureRegimeCalculator:
         self,
         conn: Any,
         date: datetime,
-    ) -> Tuple[float, Dict[str, Any]]:
+    ) -> Optional[Tuple[float, Dict[str, Any]]]:
         """
         Calculate growth composite z-score.
 
@@ -125,7 +125,7 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict)
+            Tuple of (composite_z_score, details_dict) or None if no data
         """
         try:
             # Fetch series
@@ -162,17 +162,17 @@ class FeatureRegimeCalculator:
 
             except KeyError:
                 logger.warning(f"No data for {date}")
-                return 0.0, {}
+                return None
 
         except Exception as e:
             logger.error(f"Failed to calculate growth composite: {e}")
-            return 0.0, {}
+            return None
 
     def calculate_inflation_composite(
         self,
         conn: Any,
         date: datetime,
-    ) -> Tuple[float, Dict[str, Any]]:
+    ) -> Optional[Tuple[float, Dict[str, Any]]]:
         """
         Calculate inflation composite z-score.
 
@@ -183,7 +183,7 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict)
+            Tuple of (composite_z_score, details_dict) or None if no data
         """
         try:
             # Fetch series
@@ -220,17 +220,17 @@ class FeatureRegimeCalculator:
 
             except KeyError:
                 logger.warning(f"No inflation data for {date}")
-                return 0.0, {}
+                return None
 
         except Exception as e:
             logger.error(f"Failed to calculate inflation composite: {e}")
-            return 0.0, {}
+            return None
 
     def calculate_liquidity_composite(
         self,
         conn: Any,
         date: datetime,
-    ) -> Tuple[float, Dict[str, Any]]:
+    ) -> Optional[Tuple[float, Dict[str, Any]]]:
         """
         Calculate liquidity composite z-score.
 
@@ -241,7 +241,7 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict)
+            Tuple of (composite_z_score, details_dict) or None if no data
         """
         try:
             # Fetch series
@@ -278,17 +278,17 @@ class FeatureRegimeCalculator:
 
             except KeyError:
                 logger.warning(f"No liquidity data for {date}")
-                return 0.0, {}
+                return None
 
         except Exception as e:
             logger.error(f"Failed to calculate liquidity composite: {e}")
-            return 0.0, {}
+            return None
 
     def calculate_rates_composite(
         self,
         conn: Any,
         date: datetime,
-    ) -> Tuple[float, Dict[str, Any]]:
+    ) -> Optional[Tuple[float, Dict[str, Any]]]:
         """
         Calculate rates composite z-score.
 
@@ -299,7 +299,7 @@ class FeatureRegimeCalculator:
             date: Calculation date
 
         Returns:
-            Tuple of (composite_z_score, details_dict)
+            Tuple of (composite_z_score, details_dict) or None if no data
         """
         try:
             # Fetch series
@@ -331,11 +331,11 @@ class FeatureRegimeCalculator:
 
             except KeyError:
                 logger.warning(f"No rates data for {date}")
-                return 0.0, {}
+                return None
 
         except Exception as e:
             logger.error(f"Failed to calculate rates composite: {e}")
-            return 0.0, {}
+            return None
 
     def classify_regime(
         self,
